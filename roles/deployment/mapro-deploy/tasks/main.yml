@@ -1,0 +1,31 @@
+---
+# tasks file for mapro-deploy
+- name: creating startup files in properties.
+  template:
+    src: "startup.sh.j2"
+    dest: "{{ base_path }}/startup.sh"
+  tags:
+    - mapro-config
+    - never
+
+- include: taxilla-stop.yml
+  tags:
+    - never
+    - mapro-stop
+    - mapro-deploy
+    - mapro-restart
+- include: taxilla-deployment.yml
+  tags:
+    - never
+    - mapro-deploy
+- include: taxilla-start.yml
+  tags:
+    - never
+    - mapro-deploy
+    - mapro-restart
+    - mapro-start
+- include: taxilla-health.yml
+  tags:
+    - never
+    - mapro-health
+    - health

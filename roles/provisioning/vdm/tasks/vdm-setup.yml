@@ -1,0 +1,44 @@
+---
+# etl setup
+- name: download the tomcat
+  unarchive:
+    src: "{{ tomcat_url }}"
+    dest: /opt
+    owner: "{{ user }}"
+    group: "{{ group }}"
+    remote_src: yes
+
+- name: creating setenv files in bin.
+  template:
+    src: "setenv.sh.j2"
+    dest: "{{ macre_base_path }}/bin/setenv.sh"
+
+- name: create macre.properties file
+  copy:
+    src: "{{ macre_properties_file }}"
+    dest: "{{ macre_base_path }}/conf/macre.properties"
+
+
+- name: Remove webapps directory
+  file:
+    path: "{{ macre_base_path }}/webapps"
+    state: absent
+
+- name: Create webapps directory if it does not exist
+  file:
+    path: "{{ macre_base_path }}/webapps"
+    state: directory
+    mode: 0755
+
+- name: change the ownership of directory recursevily
+  file:
+    path: "{{ macre_base_path }}"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+    mode: 0755
+    recurse: yes
+
+#- name: unzip artifact
+#  unarchive:
+#    src: "{{ artifact_path }}"
+#    dest: "{{ base_path }}/webapps"

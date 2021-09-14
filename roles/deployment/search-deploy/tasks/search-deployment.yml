@@ -1,0 +1,25 @@
+---
+##Serach deployment
+- name: ensure search directory is on search server
+  file:
+    path: "{{ base_path }}/search"
+    state: directory
+
+- name: ensure search backup directory is on search server
+  file:
+    path: "{{ backup_path }}"
+    state: directory
+
+#- name: taking the backup of search folder
+#  shell: "mv {{ base_path }}/search {{ backup_path }}/search_$(date +%d-%m-%Y_%H-%M-%S)"
+
+- name: remove the search folder
+  file:
+    path: "{{ base_path }}/search"
+    state: absent
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ artifact_path }}"
+    dest: "{{ base_path }}"
+    remote_src: yes

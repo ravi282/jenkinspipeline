@@ -1,0 +1,12 @@
+---
+# defaults file for utilities-deploy
+process_name: utilities
+user: taxadmin
+group: taxadmin
+
+base_path: /opt/utilities
+backup_path: ~/backups
+
+artifact_base: ~/ansible/artifacts
+artifact_path: "{{ artifact_base }}/utilities.zip"
+

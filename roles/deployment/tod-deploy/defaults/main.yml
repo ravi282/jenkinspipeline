@@ -1,0 +1,12 @@
+---
+# defaults file for tod
+user: taxadmin
+process_name: cassandra
+tod_base_path: /opt/apache-cassandra-3.11.5
+hints_directory: /var/cassandra/hints
+data_directory_0: /var/cassandra/data0
+data_directory_1: /var/cassandra/data1
+commitlog_directory: /var/cassandra/commitlog
+saved_caches_directory: /var/cassandra/saved_caches
+MAX_HEAP_SIZE: 32
+HEAP_NEWSIZE: 800

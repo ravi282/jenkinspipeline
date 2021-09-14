@@ -1,0 +1,91 @@
+---
+- name: updating user limits for {{ user }}
+  pam_limits:
+    domain: "{{ user }}"
+    limit_type: "{{ item.limit_type }}"
+    limit_item: "{{ item.limit_item }}"
+    value: "{{ item.value }}"
+    comment: "{{ item.value }} {{ item.limit_item }} for {{ user }} elastic search"
+  with_items:
+    - { limit_type: "-", limit_item: nofile, value: 100000 }
+    - { limit_type: "-", limit_item: nproc, value: 32768 }
+    - { limit_type: "-", limit_item: as, value: unlimited }
+    - { limit_type: "-", limit_item: memlock, value: unlimited }
+
+
+- name: updatng kernel parameters
+  sysctl:
+    name: "{{ item.name}}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { name: net.core.rmem_max, value: 16777216 }
+    - { name: net.core.wmem_max, value: 16777216 }
+    - { name: net.core.rmem_default, value: 16777216 }
+    - { name: net.core.wmem_default, value: 16777216 }
+    - { name: net.core.optmem_max, value: 40960 }
+    - { name: net.ipv4.tcp_rmem, value: "4096 87380 16777216" }
+    - { name: net.ipv4.tcp_wmem, value: "4096 65536 16777216" }
+    - { name: vm.max_map_count, value: 1048575 }
+  tags:
+    - kernel-parameter
+
+- name: download the binary for cassandra
+  unarchive:
+    dest: /opt
+    src: "{{ tod_artifact_path }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    remote_src: yes
+
+- name: update the cassandra.yml configuration file
+  template:
+    dest: "{{ base_path}}/conf/cassandra.yaml"
+    src: cassandra.yaml.j2
+  tags:
+    - tod-config
+
+- name: update rack dc properties
+  template:
+    dest: "{{ base_path }}/conf/cassandra-rackdc.properties"
+    src: cassandra-rackdc.properties.j2
+
+- name: update cassandra env
+  template:
+    dest: "{{ base_path }}/conf/cassandra-env.sh"
+    src: cassandra-env.sh.j2
+
+- name: update copy jvm options
+  copy:
+    dest: "{{ base_path }}/conf/jvm.options"
+    src: jvm.options
+
+- name: create {{ item }} directory
+  file:
+    path: "{{ item }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    state: directory
+    recurse: yes
+  with_items:
+    - "{{ hints_directory }}"
+    - "{{ commitlog_directory }}"
+    - "{{ saved_caches_directory }}"
+
+- name: create {{ item }} directory
+  file:
+    path: "{{ item }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    state: directory
+    recurse: yes
+  with_items: "{{ data_directory }}"
+
+- name: changing the permisions to taxadmin
+  file:
+    path: "{{ base_path }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    recurse: yes
+    state: directory
+

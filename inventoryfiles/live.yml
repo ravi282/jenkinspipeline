@@ -1,0 +1,327 @@
+---
+all:
+  vars:
+    user: taxadmin
+    group: taxadmin
+    version: 3.4.8
+    ansible_user: centos
+    ansible_ssh_private_key_file: ~/.ssh/ADQ-stage-IND.pem
+    zabbix_server: 10.0.0.59
+    tax_port: 8080
+    etl_port: 8080
+    search_port: 8080
+    user_port: 9191
+    tax_health_url: /mapro/application-properties
+    etl_health_url: /etl/rest/etl
+    search_health_url: /search/healthcheck
+    user_health_url: /idm/misc/properties
+    jgroup_cluster_name: encomply-prod-jgroup
+    mysql_hostname: taxilla-prodcutiondb-instance.clquipaonlfp.ap-south-1.rds.amazonaws.com
+    mysql_user: root
+    mysql_password: Password$321
+    access: AKIAJD77LECDCLZ5Z3WQ
+    secret: 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
+    eb_base_path: /opt/enTransact/envoice-server
+    zabbix_metadata: live
+    elk: 10.0.2.252
+
+
+  children:
+    mapro:
+      vars:
+        process_name: taxilla
+        jgroup_cluster_name: jgroups-encomplyqa-cluster
+        heap_memory: 8
+        file_beat_path: /opt/taxilla/logs/taxilla.log
+        tmp_dir: /var/taxilla
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-production-releases/Taxilla/prod-release/v{{ version }}/prod-release-v{{ version }}-taxilla.zip
+        health_url: http://localhost:{{ tax_port }}/mapro/application-properties
+        base_path: /opt/taxilla
+        backup_path: ~/backups
+        artifact_base: ~/ansible/artifacts
+      children:
+        mapro_encomply:
+          vars:
+            category: '-'
+          hosts:
+            encomply-mapro-1:
+              ansible_host: 10.0.3.229
+            encomply-mapro-2:
+              ansible_host: 10.0.1.229
+            encomply-mapro-3:
+              ansible_host: 10.0.3.247
+
+        mapro_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            eninvoice-mapro-1:
+              ansible_host: 10.0.3.252
+            eninvoice-mapro-2:
+              ansible_host: 10.0.1.168
+            eninvoice-mapro-3:
+              ansible_host: 10.0.3.32
+            eninvoice-mapro-4:
+              ansible_host: 10.0.3.188
+            eninvoice-mapro-5:
+              ansible_host: 10.0.1.219
+            eninvoice-mapro-6:
+              ansible_host: 10.0.1.236
+            eninvoice-mapro-7:
+              ansible_host: 10.0.1.4
+            eninvoice-mapro-8:
+              ansible_host: 10.0.1.70
+
+    etl:
+      vars:
+        file_beat_path: /opt/etltomcat9037/logs/etl.log
+        heap_memory: 24
+        CATALINA_TMPDIR: "/etl-tmp"
+        health_url: http://localhost:{{ etl_port }}/etl/rest/etl
+        process_name: etl
+        tomcat_url: https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.37/bin/apache-tomcat-9.0.37.zip
+        base_path: /opt/etltomcat9037
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-production-releases/Taxilla/prod-release/v{{ version }}/prod-release-v{{ version }}-etl.zip
+      children:
+        etl_encomply:
+          vars:
+            category: '-'
+          hosts:
+            encomply-etl-1:
+              ansible_host: 10.0.3.253
+            encomply-etl-2:
+              ansible_host: 10.0.1.44
+            encomply-etl-3:
+              ansible_host: 10.0.3.231
+
+        etl_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            eninvoice-etl-1:
+              ansible_host: 10.0.3.207
+            eninvoice-etl-2:
+              ansible_host: 10.0.1.181
+            eninvoice-etl-3:
+              ansible_host: 10.0.3.5
+            eninvoice-etl-4:
+              ansible_host: 10.0.3.99
+            eninvoice-etl-5:
+              ansible_host: 10.0.3.145
+            eninvoice-etl-6:
+              ansible_host: 10.0.1.128
+            eninvoice-etl-7:
+              ansible_host: 10.0.1.137
+            eninvoice-etl-8:
+              ansible_host: 10.0.1.214
+            eninvoice-etl-9:
+              ansible_host: 10.0.1.105
+            eninvoice-etl-10:
+              ansible_host: 10.0.1.47
+            eninvoice-etl-11:
+              ansible_host: 10.0.1.108
+            eninvoice-etl-12:
+              ansible_host: 10.0.1.126
+
+    search:
+      vars:
+        file_beat_path: /opt/search-server/logs/search.log
+        health_url: http://localhost:{{ search_port }}/search/healthcheck
+        process_name: search
+        search_subdirectory: /search
+        base_path: /opt/search-server
+        heap_memory: 8
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-production-releases/Taxilla/prod-release/v{{ version }}/prod-release-v{{ version }}-search.zip
+      children:
+        search_encomply:
+          vars:
+            category: '-'
+          hosts:
+            encomply-search-1:
+              ansible_host: 10.0.3.219
+            encomply-search-2:
+              ansible_host: 10.0.1.65
+
+        search_eninvoice:
+          vars:
+            category: 'ewb'
+          hosts:
+            eninvoice-search-1:
+              ansible_host: 10.0.3.106
+            eninvoice-search-2:
+              ansible_host: 10.0.1.46
+            eninvoice-search-3:
+              ansible_host: 10.0.3.41
+            eninvoice-search-4:
+              ansible_host: 10.0.3.182
+            eninvoice-search-5:
+              ansible_host: 10.0.3.201
+            eninvoice-search-6:
+              ansible_host: 10.0.3.175
+            eninvoice-search-7:
+              ansible_host: 10.0.3.8
+            eninvoice-search-8:
+              ansible_host: 10.0.3.176
+
+
+    eninvoice_backend:
+      vars:
+        es_base_path: /opt/enTransact/envoice-server
+      hosts:
+        eninvoice-backend-utilities-addtax-1:
+          ansible_host: 10.0.3.170
+        eninvoice-backend-utilities-addtax-2:
+          ansible_host: 10.0.1.102
+        eninvoice-backend-utilities-addtax-3:
+          ansible_host: 10.0.3.221
+
+    user:
+      vars:
+        mysql_hostname: taxilla-prodcutiondb-instance.clquipaonlfp.ap-south-1.rds.amazonaws.com
+        mysql_user: root
+        mysql_password: Password$321
+        qr_code_url: internal-Nat-GoogleUtilities-LB-2111440420.ap-south-1.elb.amazonaws.com
+        heap_memory: 8
+        process_name: user
+        user_base_path: /opt/user
+        backup_path: ~/backups
+        userport: 9191
+        user_subdirectory: /idm/misc/properties
+        artifact_base: ~/ansible/artifacts
+        schema_name: user
+        user_artifact_path: http://35.175.83.118:8081/repository/taxilla-production-releases/Taxilla/prod-release/v{{ version }}/prod-release-v{{ version }}-user.zip
+
+      hosts:
+        encomply-user-new-1:
+          ansible_host: 10.0.1.197
+        encomply-user-new-2:
+          ansible_host: 10.0.1.90
+        encomply-user-new-3:
+          ansible_host: 10.0.1.120
+
+    vdm:
+      hosts:
+        encomply-prod-vdm:
+          ansible_host: 10.0.0.4
+
+    elastic_search:
+      hosts:
+        encomply-elastic-search-1:
+          ansible_host: 10.0.1.31
+        encomply-elastic-search-2:
+          ansible_host: 10.0.1.32
+        encomply-elastic-search-3:
+          ansible_host: 10.0.1.33
+        encomply-elastic-search-4:
+          ansible_host: 10.0.3.197
+        encomply-elastic-search-5:
+          ansible_host: 10.0.3.11
+        encomply-elastic-search-6:
+          ansible_host: 10.0.3.123
+
+    tods:
+      vars:
+        base_path: /opt/apache-cassandra-3.9
+        hints_directory: /var/cassandra/hints
+        data_directory:
+          - /var/cassandra/data0
+          - /var/cassandra/data1
+        commitlog_directory: /var/cassandra/commitlog
+        saved_caches_directory: /var/cassandra/saved_caches
+        MAX_HEAP_SIZE: 32
+        HEAP_NEWSIZE: 800
+        cluster_name: encomply_prod_cluster
+        dc: encomplyprod_dc
+        rack: encomplyprod_rack
+        jdk: java-1.8.0-openjdk
+        tod_artifact_path: https://archive.apache.org/dist/cassandra/3.9/apache-cassandra-3.9-bin.tar.gz
+        seeds:
+          - 10.0.3.110
+          - 10.0.1.11
+          - 10.0.1.116
+      hosts:
+        encomply-tod-1:
+          ansible_host: 10.0.3.110
+        encomply-tod-2:
+          ansible_host: 10.0.1.221
+        encomply-tod-3:
+          ansible_host: 10.0.1.11
+        encomply-tod-4:
+          ansible_host: 10.0.1.175
+        encomply-tod-5:
+          ansible_host: 10.0.1.231
+        encomply-tod-6:
+          ansible_host: 10.0.1.116
+        encomply-tod-7:
+          ansible_host: 10.0.1.230
+        encomply-tod-8:
+          ansible_host: 10.0.1.202
+        encomply-tod-9:
+          ansible_host: 10.0.1.57
+        encomply-tod-dr-1:
+          ansible_host: 10.0.0.167
+        encomply-tod-dr-2:
+          ansible_host: 10.0.0.168
+
+
+    nginx:
+      hosts:
+        encomply-nginx-node1:
+          ansible_host: 10.0.3.156
+        encomply-nginx-node2:
+          ansible_host: 10.0.3.146
+        encomply-nginx-node3:
+          ansible_host: 10.0.1.171
+
+    zookeeper:
+      hosts:
+        encomply-zookeeper-1:
+          ansible_host: 10.0.3.47
+          node_id: 1
+        encomply-zookeeper-2:
+          ansible_host: 10.0.1.188
+          node_id: 2
+        encomply-zookeeper-3:
+          ansible_host: 10.0.1.148
+          node_id: 3
+
+    kafka:
+      hosts:
+        encomply-kafka-1:
+          ansible_host: 10.0.3.90
+          broker_id: 1
+        encomply-kafka-2:
+          ansible_host: 10.0.1.134
+          broker_id: 2
+        encomply-kafka-3:
+          ansible_host: 10.0.1.174
+          broker_id: 3
+    hz:
+      hosts:
+        encomply-hazelcast-node-1:
+          ansible_host: 10.0.3.230
+        encomply-hazelcast-node-2:
+          ansible_host: 10.0.1.24
+        encomply-hazelcast-node-3:
+          ansible_host: 10.0.3.88
+
+    wrappers:
+      vars:
+        ansible_user: ec2-user
+        artifact: ~/CloudWatchMonitoringScripts-1.2.2.zip
+        remote_tmp: /tmp/{{ ansible_user }}/ansible
+      hosts:
+        enComply-AddTax-Gstwrapper-1:
+          ansible_host: 13.127.239.224
+        enComply-AddTax-Gstwrapper-2:
+          ansible_host: 13.126.77.212
+
+    reaper:
+      vars:
+        jdk: java-1.8.0-openjdk
+        db_name: reaper_db
+        db_user: reaper
+        db_password: Adq$123
+      hosts:
+        live-encomply-reaper-1:
+          ansible_host: 192.168.10.30

@@ -1,0 +1,35 @@
+---
+
+- name: verifying for all the varibles declaration.
+  fail: msg="Variable '{{ item }}' is not defined"
+  when: item not in hostvars[inventory_hostname]
+  with_items:
+    - property_file
+
+- name: create directory eninvoice-server.
+  file:
+    path: /opt/envoice-server
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ group }}"
+
+- name: create startup script
+  template:
+    src: "startup.sh.j2"
+    dest: "{{ eb_base_path }}/startup.sh"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+
+- name: create properties file.
+  copy:
+    src: "{{ property_file }}"
+    dest: "{{ eb_base_path }}/envoice.properties"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+
+- name: create tmp directory
+  file:
+    path: "{{ data_directory }}"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+    state: directory

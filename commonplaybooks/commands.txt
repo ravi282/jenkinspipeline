@@ -1,0 +1,60 @@
+#
+# #vnc connection
+# ssh -i .ssh/pemfiles/encomplyQA.pem -L 5903:127.0.0.1:5903 -C -N -l srinath 54.70.61.157 -- qataxilla
+#
+# ssh -i ~/.ssh/pemfiles/ADQ-stage-IND.pem -L 5903:127.0.0.1:5903 -C -N -l srinath 52.66.63.11 --live
+#
+# 1. setting up mapro node.
+# `ansible-playbook -i inventory/develop/devlop-infra zoo.yml --tags "common,tax-setup" --extra-vars "env=develop"`
+
+
+#
+# ansible-playbook -i inventory/kpmg-prod.yml common.yml --limit mapro_addons
+# ansible-playbook -i inventory/kpmg-prod.yml provisioning.yml --limit mapro_addons
+# ansible-playbook -i inventory/kpmg-prod.yml common.yml --limit etl_addons
+# ansible-playbook -i inventory/kpmg-prod.yml provisioning.yml --limit etl_addons
+# ansible-playbook -i inventory/kpmg-prod.yml common.yml --limit search_addons
+# ansible-playbook -i inventory/kpmg-prod.yml provisioning.yml --limit search_addons
+
+ansible-playbook -i inventory/kpmg-prod.yml deployment.yml --tags "mapro-restart" --limit=mapro_encomply
+ansible-playbook -i inventory/kpmg-prod.yml deployment.yml --tags "mapro-restart" --limit=mapro_addons,mapro_emi,mapro_eninvoice,mapro_2a
+ansible-playbook -i inventory/kpmg-prod.yml deployment.yml --tags "etl-restart" --limit=etl_encomply
+ansible-playbook -i inventory/kpmg-prod.yml deployment.yml --tags "etl-restart" --limit=etl_addons,etl_emi,etl_eninvoice,etl_2a
+ansible-playbook -i inventory/kpmg-prod.yml deployment.yml --tags "search-restart" --limit=search_encomply
+sleep 10
+ansible-playbook -i inventory/kpmg-prod.yml deployment.yml --tags "search-restart" --limit=search_addons,search_emi,search_eninvoice,search_2a
+
+LIVE#
+Service stop
+
+
+ansible-playbook -i inventory/live.yml ui-deployment.yml --tags "nginx-stop"
+ansible-playbook -i inventory/live.yml deployment.yml --tags "user-stop,mapro-stop,etl-stop,search-stop,macre-stop,eb-stop,utilities-stop"
+
+
+ansible-playbook -i inventory/live.yml deployment.yml --tags "user-deploy" --limit=user
+ansible-playbook -i inventory/live.yml deployment.yml --tags "user-health" --limit=user
+ansible-playbook -i inventory/live.yml deployment.yml --tags "mapro-deploy" --limit=mapro_encomply
+ansible-playbook -i inventory/live.yml deployment.yml --tags "mapro-health" --limit=mapro_encomply
+ansible-playbook -i inventory/live.yml deployment.yml --tags "mapro-deploy" --limit=mapro_eninvoice
+ansible-playbook -i inventory/live.yml deployment.yml --tags "mapro-health" --limit=mapro_eninvoice
+ansible-playbook -i inventory/live.yml deployment.yml --tags "etl-deploy" --limit=etl_encomply
+ansible-playbook -i inventory/live.yml deployment.yml --tags "etl-health" --limit=etl_encomply
+ansible-playbook -i inventory/live.yml deployment.yml --tags "etl-deploy" --limit=etl_eninvoice
+ansible-playbook -i inventory/live.yml deployment.yml --tags "etl-health" --limit=etl_eninvoice
+ansible-playbook -i inventory/live.yml deployment.yml --tags "search-deploy" --limit=search_encomply
+ansible-playbook -i inventory/live.yml deployment.yml --tags "search-health" --limit=search_encomply
+ansible-playbook -i inventory/live.yml deployment.yml --tags "search-deploy" --limit=search_eninvoice
+ansible-playbook -i inventory/live.yml deployment.yml --tags "search-health" --limit=search_eninvoice
+ansible-playbook -i inventory/live.yml deployment.yml --tags "eb-deploy" --limit=user,eninvoice-backend
+ansible-playbook -i inventory/live.yml deployment.yml --tags "utilities-deploy" --limit=user
+
+ansible-playbook -i inventory/live.yml deployment.yml --tags "macre-deploy" --limit=vdm
+
+ansible-playbook -i inventory/live.yml ui-deployment.yml --tags "ecui,erui,eiui"
+ansible-playbook -i inventory/live.yml ui-deployment.yml --tags "emgecui,emgerui,emgeiui"
+ansible-playbook -i inventory/live.yml ui-deployment.yml --tags "macre-ui"
+
+
+
+

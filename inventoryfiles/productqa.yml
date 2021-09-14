@@ -1,0 +1,151 @@
+---
+all:
+  vars:
+    ansible_user: centos
+    ansible_ssh_private_key_file: ~/.ssh/product-qa.pem
+    eisrc: "/usr/share/nginx/eninvoice/app"
+    zabbix_server: 10.0.0.231
+    tax_port: 8282
+    etl_port: 8080
+    es_port: 9200
+    search_port: 8080
+    macre_port: 8080
+    user_port: 8181
+    es_health_url: /_cat/health
+    macre_health_url: /vdm/api/properties
+    tax_health_url: /mapro/application-properties
+    etl_health_url: /etl/rest/etl
+    search_health_url: /search/healthcheck
+    user_health_url: /idm/misc/properties
+  children:
+    mapro:
+      vars:
+        process_name: taxilla
+        base_path: /opt/taxilla
+        backup_path: ~/backups
+        health_url: http://localhost:{{ tax_port }}/mapro/application-properties
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        heap_memory: 8
+        file_beat_path: /opt/taxilla/logs/taxilla.log
+        tmp_dir: /var/taxilla
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/devtaxilla/dev/devtaxilla-dev-mapro.zip
+      hosts:
+        product-qa-mapro-01:
+          ansible_host: 192.168.0.204
+    etl:
+      vars:
+        process_name: etl
+        tomcat_url: https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.37/bin/apache-tomcat-9.0.37.zip
+        base_path: /opt/etltomcat9037
+        file_beat_path: /opt/etltomcat9037/logs/etl.log
+        heap_memory: 24
+        CATALINA_TMPDIR: "/var/etl"
+        health_url: http://localhost:{{ etl_port }}/etl/rest/etl
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/devtaxilla/dev/devtaxilla-dev-etl.zip
+      hosts:
+        productqa-etl-01:
+          ansible_host: 192.168.0.204
+
+    search:
+      vars:
+        process_name: search
+        search_subdirectory: /search
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        base_path: /opt/search-server
+        file_beat_path: "{{ base_path }}/logs/search.log"
+        health_url: http://localhost:{{ search_port }}/search/healthcheck
+        heap_memory: 8
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/devtaxilla/dev/devtaxilla-dev-search.zip
+      hosts:
+        productqa-search-01:
+          ansible_host: 192.168.0.202
+
+    user:
+      vars:
+        process_name: user
+        user_base_path: /opt/user
+        backup_path: ~/backups
+        health_url: http://localhost:{{ user_port }}/idm/misc/properties
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        heap_memory: 8
+        file_beat_path: /opt/user/logs/application.log
+        tmp_dir: /var/taxilla
+        user_artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/devtaxilla/dev/devtaxilla-dev-user.zip
+      hosts:
+        product-qa-user1:
+          ansible_host: 192.168.0.205
+
+    vdm:
+      vars:
+        process_name: vdm
+        health_url: http://localhost:{{ macre_port }}/vdm/api/properties
+        base_path: /opt/vdmtomcat9037
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/devtaxilla/dev/devtaxilla-dev-vdm.zip
+      hosts:
+        product-qa-vdm:
+          ansible_host: 192.168.0.203
+    es:
+      hosts:
+        product-qa-elastic-search-1:
+          ansible_host: 192.168.0.202
+
+    tods:
+      hosts:
+        product-qa-tod-1:
+          ansible_host: 192.168.0.201
+
+    nginx:
+      vars:
+        base_path: /usr/share/nginx
+        macreui_base_path: /usr/share/nginx/macre
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/devtaxilla/dev/devtaxilla-dev-taxillaui.zip
+      hosts:
+        product-qa-nginx-1:
+          ansible_host: 192.168.0.10
+
+    macreui:
+      vars:
+        macreui_base_path: /usr/share/nginx/macre
+        macreui_artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/devtaxilla/dev/devtaxilla-dev-macreui.zip
+      hosts:
+        product-qa-macreui:
+          ansible_host: 192.168.0.10
+
+    zookeeper:
+      hosts:
+        product-qa-zookeeper-1:
+          ansible_host: 192.168.0.206
+
+    property:
+      vars:
+        base_path: /opt/property-loader
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/devtaxilla/dev/devtaxilla-dev-property.zip
+      hosts:
+        product-qa-zookeeper-1:
+          ansible_host: 192.168.0.206
+
+    utils:
+      vars:
+        process_name: util
+        base_path: /opt/utilities_gmap
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/devtaxilla/dev/devtaxilla-dev-gmap.zip
+      hosts:
+        product-qa-utils-vdm:
+          ansible_host: 192.168.0.203
+
+    kafka:
+      hosts:
+        product-qa-kafka-1:
+          ansible_host: 192.168.0.206
+
+    eb:
+      vars:
+        eb_process_name: eninvoice
+        eb_health_url: http://localhost:{{eb_prot}}/
+        eb_base_path: /opt/envoice-server
+        eb_artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/devtaxilla/dev/devtaxilla-dev-eninvoice.zip
+      hosts:
+        product-qa-eb-backend-1:
+          ansible_host: 192.168.0.205
+

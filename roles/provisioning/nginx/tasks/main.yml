@@ -1,0 +1,19 @@
+---
+# tasks file for nginx
+- name: Install nginx.
+  package:
+    name: nginx
+    state: present
+
+- name: update nginx file
+  copy:
+    dest: /etc/nginx/nginx.conf
+    src: nginx.conf
+
+
+- name: updane http.conf file
+  template:
+    dest: /etc/nginx/conf.d/http.conf
+    src: http.conf.j2
+
+  

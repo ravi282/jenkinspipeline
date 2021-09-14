@@ -1,0 +1,6 @@
+---
+#eninvoice backend start
+- name: start eninvoice backend server
+  shell:
+    chdir: "{{ eb_base_path }}"
+    cmd: /usr/bin/nohup /bin/sh startup.sh

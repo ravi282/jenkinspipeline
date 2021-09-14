@@ -1,0 +1,6 @@
+---
+#eninvoice backend start
+- name: start property-loader backend server
+  shell:
+    chdir: "{{ base_path }}"
+    cmd: /usr/bin/nohup /bin/sh load-properties.sh

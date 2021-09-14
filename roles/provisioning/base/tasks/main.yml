@@ -1,0 +1,74 @@
+---
+# tasks file for base
+
+- name: create taxadmin user
+  user:
+    name: taxadmin
+
+- name: epel repo
+  yum:
+    name:
+      - epel-release
+    state: present
+
+- name: install packages
+  yum:
+    name:
+      - "{{ jdk }}"
+      - "{{ zabbix_repo }}"
+      - unzip
+      - git
+      - wget
+      - glances
+    state: present
+
+- name: zabbix client
+  package:
+    name: zabbix-agent
+    state: present
+
+- name: install file beat
+  package:
+    name: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.6.0-x86_64.rpm
+    state: present
+
+- name: Add or modify nofile, both soft and hard, limit for the user taxadmin with a comment.
+  pam_limits:
+    domain: taxadmin
+    limit_type: '-'
+    limit_item: nofile
+    value: 200000
+    comment: 200000 nofile for taxadmin
+
+- name: Add or nproc, both soft and hard, limit for the user taxadmin with a comment.
+  pam_limits:
+    domain: taxadmin
+    limit_type: '-'
+    limit_item: nproc
+    value: 32768
+    comment: 32768 nproc for taxadmin.
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  selinux:
+    policy: targeted
+    state: permissive
+
+- name: taxdmin alias
+  lineinfile:
+    path: /home/centos/.bash_profile
+    line: alias tax='sudo su - taxadmin'
+
+- name: Make sure we have a 'wheel' group
+  group:
+    name: wheel
+    state: present
+
+- name: Add Unix Admins users
+  user: name=taxadmin groups=wheel
+
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'

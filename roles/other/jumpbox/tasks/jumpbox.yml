@@ -1,0 +1,32 @@
+---
+#sudo yum remove libnfsidmap
+- name: Update apt-get repo and cache
+  apt:
+    upgrade: dist
+    update_cache: yes
+    cache_valid_time: 86400 #One day
+
+- name: install packages.
+  apt:
+    name:
+      - xfce4
+      - xfce4-goodies
+      - ubuntu-desktop
+      - gnome-panel
+      - gnome-settings-daemon
+      - metacity
+      - nautilus
+      - gnome-terminal
+      - xfce4
+      - tightvncserver
+      - expect
+    state: present
+
+
+
+
+
+
+
+
+#sudo apt-get purge xfconf xfce4-utils xfwm4 xfce4-session thunar xfdesktop4 exo-utils xfce4-panel xfce4-terminal

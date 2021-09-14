@@ -1,0 +1,22 @@
+export JAVA_OPTS="-Xms{{ heap_memory }}G -Xmx{{ heap_memory }}G"
+export JAVA_OPTS="$JAVA_OPTS -Djava.io.tmpdir={{ tmp_dir }}"
+export JAVA_OPTS="$JAVA_OPTS -Dtaxilla.es.enable=true"
+export JAVA_OPTS="$JAVA_OPTS -Dspring.profiles.active=kafka"
+export JAVA_OPTS="$JAVA_OPTS -Dmapro.zookeeper.servers={% for h in groups['zookeeper'] -%}
+{% if  not loop.last -%}
+    {{ hostvars[h].ansible_host }}:2181,
+{%- endif %}
+{% if loop.last -%}
+    {{ hostvars[h].ansible_host }}:2181
+{%- endif %}
+{%- endfor %}"
+export JAVA_OPTS="$JAVA_OPTS -Detl.as.separate.runnable=true"
+export JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
+export JAVA_OPTS="$JAVA_OPTS -Djgroups-config-file=/opt/taxilla/properties/jgroups_s3_config.xml"
+export JAVA_OPTS="$JAVA_OPTS -Djgroups-cluster-name={{ jgroup_s3_bucket_name }}"
+export JAVA_OPTS="$JAVA_OPTS -Dproject.base.dir=/opt/taxilla/"
+export JAVA_OPTS="$JAVA_OPTS -Dapp.name=encomply"
+export JAVA_OPTS="$JAVA_OPTS -Dhazelcast.diagnostics.enabled=true"
+export JAVA_OPTS="$JAVA_OPTS -Dmapro.kafka.allowed.categories={{ category }}"
+export JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
+sh /opt/taxilla/taxilla/bin/taxilla &

@@ -1,0 +1,12 @@
+---
+# defaults file for mapro
+process_name: taxilla
+base_path: /opt/taxilla
+backup_path: /home/taxadmin/backups
+mapro_subdirectory: /mapro
+artifact_base: ~/ansible/artifacts
+artifact_path: "{{ artifact_base }}/taxilla.zip"
+user: taxadmin
+group: taxadmin
+tmp_dir: /var/taxilla
+

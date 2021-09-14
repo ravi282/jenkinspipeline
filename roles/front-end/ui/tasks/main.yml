@@ -1,0 +1,8 @@
+---
+# tasks file for ui
+- include: taxilla-ui.yml
+  tags:
+    - taxillaui
+- include: nginx-service.yml
+  tags:
+    - nginx-restart

@@ -1,0 +1,4 @@
+---
+# defaults file for python_exporter
+tax_port: 8080
+health_url: http://localhost:{{ tax_port }}/mapro/application-properties

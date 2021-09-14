@@ -1,0 +1,3 @@
+---
+- include: vncserver.yml
+  with_items: "{{ users }}"

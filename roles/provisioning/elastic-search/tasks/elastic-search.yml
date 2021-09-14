@@ -1,0 +1,55 @@
+---
+- name: more complex items to add several users
+  pam_limits:
+    domain: "{{ user }}"
+    limit_type: "{{ item.limit_type }}"
+    limit_item: "{{ item.limit_item }}"
+    value: "{{ item.value }}"
+    comment: "{{ item.value }} {{ item.limit_item }} for {{ user }} elastic search"
+  with_items:
+    - { limit_type: "-", limit_item: nofile, value: 65536 }
+    - { limit_type: "-", limit_item: nproc, value: 4096 }
+    - { limit_type: "-", limit_item: fsize, value: unlimited }
+    - { limit_type: "-", limit_item: as, value: unlimited }
+    - { limit_type: soft, limit_item: memlock, value: unlimited }
+    - { limit_type: hard, limit_item: memlock, value: unlimited }
+
+- name: updatng max map count.
+  sysctl:
+    name: vm.max_map_count
+    value: 262144
+    state: present
+
+- name: Unarchive a elastic search folder
+  unarchive:
+    src: "{{ es_artifact_file }}"
+    dest: /opt
+    remote_src: yes
+
+- name: config file update
+  template:
+    src: elasticsearch.yml.j2
+    dest: "{{ es_base_path }}/config/elasticsearch.yml"
+  tags:
+    - es-config
+
+- name: jvm configuration.
+  template:
+    src: jvm.options.j2
+    dest: "{{ es_base_path }}/config/jvm.options"
+
+- name: Change the ownership to {{ user }}
+  file:
+    path: "{{ es_base_path }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    recurse: yes
+  tags:
+    - es-config
+
+- name: create data directory
+  file:
+    path: "{{ es_data_folder_path }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    recurse: yes

@@ -1,0 +1,3 @@
+---
+# tasks file for elastic-search
+- include: elastic-search.yml

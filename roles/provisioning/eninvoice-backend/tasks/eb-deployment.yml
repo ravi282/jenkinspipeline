@@ -1,0 +1,22 @@
+---
+# user deployment
+- block:
+  - name: ensure eninvoice directory is on eninvoice server
+    file:
+      path: "{{ eb_base_path }}/eninvoice"
+      state: directory
+
+  - name: ensure user backup directory is on eninvoice server
+    file:
+      path: "{{ backup_path }}"
+      state: directory
+
+  - name: taking the backup of eninvoice folder
+    shell: "mv {{ base_path}}/eninvoice {{ backup_path }}/eninvoice_$(date +%d-%m-%Y_%H-%M-%S)"
+
+  - name: unzip artifact
+    unarchive:
+      src: "{{ artifact_path }}"
+      dest: "{{ base_path }}"
+  become: yes
+  become_user: "{{ user }}"

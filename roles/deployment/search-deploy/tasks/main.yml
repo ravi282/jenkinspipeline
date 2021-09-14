@@ -1,0 +1,23 @@
+---
+# tasks file for search-deploy
+- include: search-stop.yml
+  tags:
+    - never
+    - search-stop
+    - search-deploy
+    - search-restart
+- include: search-deployment.yml
+  tags:
+    - never
+    - search-deploy
+- include: search-start.yml
+  tags:
+    - never
+    - search-restart
+    - search-start
+    - search-deploy
+- include: search-health.yml
+  tags:
+    - never
+    - search-health
+    - health

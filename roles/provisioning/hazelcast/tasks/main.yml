@@ -1,0 +1,5 @@
+---
+# tasks file for hazelcast
+- include: hazelcast.yml
+  tags:
+    - hazelcast

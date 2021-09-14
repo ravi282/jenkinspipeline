@@ -1,0 +1,5 @@
+---
+#health check for search
+- name: serach service health check
+  uri:
+    url: "http://localhost:{{ search_port }}{{ search_health_url }}"

@@ -1,0 +1,46 @@
+def Java_Version = "OPENJDK-11.0.7"
+def PIPELINE_PROPS
+
+pipeline {
+    agent any
+
+    libraries {
+        lib('taxilla-jenkins-shared-library@release_branch')
+    }
+    tools {
+        jdk "$Java_Version"
+    }
+
+    parameters {
+        choice(name: 'Branch', choices: ['release_branch', 'develop', 'hotfix_branch'],
+                description: 'Pick something from the above branch for the currently required build')
+
+            }
+
+     stages {
+            stage("Etl Build") {
+
+                steps {
+                    script {
+                            catchError(stageResult: 'FAILURE'){
+                            PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                            // checkout code from git remote repositories
+                            gitCheckOut("${PIPELINE_PROPS["ETL_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["ETL_JOB_PROJECT_NAME"]}")
+                            //Clean old jars from .gradle cache directory
+                            cleanOldJars()
+                            //Compile build as per module defined in reading property file
+                            compileSource("${PIPELINE_PROPS["ETL_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ETL_MACRE_BUILD_COMMAND"]}", "${PIPELINE_PROPS["ETL_CLASSIFIER"]}")
+                            //upload binaries to nexus repository
+                            uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["ETL_CLASSIFIER"]}", "${PIPELINE_PROPS["QA_ARTIFACT_ID"]}",
+                                    "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["ETL_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ETL_BINARIES_PATH"]}")
+                            if (currentBuild.currentResult == 'SUCCESS') {
+                                echo "Test Failed Stage"
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+     }

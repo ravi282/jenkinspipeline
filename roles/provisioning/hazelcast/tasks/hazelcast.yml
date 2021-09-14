@@ -1,0 +1,35 @@
+---
+- name: verifying for all the varibles declaration.
+  fail: msg="Variable '{{ item }}' is not defined"
+  when: item not in hostvars[inventory_hostname]
+  with_items:
+    - hazelcast_name
+
+- name: download the hazelcast.zip file from artifactory
+  unarchive:
+    dest: /opt
+    src: http://35.175.83.118:8081/repository/taxilla-softwares/hazelcast/hazelcast.zip
+    remote_src: yes
+    owner: "{{ user }}"
+    group: "{{ user }}"
+
+- name: update hazelcast xml file
+  template:
+    dest: /opt/hazelcast/bin/hazelcast.xml
+    src: hazelcast.xml.j2
+
+- name: update hazelcast startup file with JVM options
+  template:
+    dest: /opt/hazelcast/bin/start.sh
+    src: start.sh.j2
+
+- name: strat hazelcast server
+  shell:
+    chdir: "{{ base_path }}/bin"
+    cmd: /usr/bin/nohup /bin/sh start.sh
+  become: yes
+  become_user: taxadmin
+
+
+
+

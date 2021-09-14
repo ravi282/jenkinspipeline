@@ -1,0 +1,6 @@
+---
+#health check for taxilla
+- name: mapro service health check
+  uri:
+    url: "http://localhost:{{ tax_port }}{{ tax_health_url }}"
+    

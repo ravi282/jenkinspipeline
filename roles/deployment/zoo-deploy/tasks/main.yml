@@ -1,0 +1,35 @@
+---
+# tasks file for zoo-deploy
+- include: zookeeper-stop.yml
+  tags:
+    - zoo-stop
+    - zoo-restart
+    - never
+
+- name: start zookeeper server
+  become: yes
+  become_user: "{{ user }}"
+  shell:
+    chdir: "{{ zoo_base_path }}/bin"
+    cmd: /usr/bin/nohup /bin/sh zkServer.sh start &
+  tags:
+    - zoo-start
+    - zoo-restart
+
+- name: zookeeper health check
+  become: yes
+  become_user: "{{ user }}"
+  shell:
+    chdir: "{{ zoo_base_path }}/bin"
+    cmd: /bin/sh zkServer.sh status
+  tags:
+    - zoo-health
+    - never
+- include: zookeeper-health.yml
+  tags:
+    - never
+    - zookeeper-health
+    - health
+- include: ncat-config.yml
+  tags:
+    - ncat

@@ -1,0 +1,298 @@
+---
+all:
+  vars:
+    ansible_user: centos
+    ansible_ssh_private_key_file: ~/.ssh/pemfiles/KPMG-3node-stage.pem
+    eisrc: "/usr/share/nginx/eninvoice/app"
+    zabbix_server: 10.0.3.243
+    tax_port: 8080
+    etl_port: 8080
+    search_port: 8383
+    user_port: 9191
+    tax_health_url: /mapro/application-properties
+    etl_health_url: /etl/rest/etl
+    search_health_url: /search/healthcheck
+    user_health_url: /users
+    jgroup_s3_bucket_name: kpmg-3nodestage-jgroup
+    elk: 10.0.3.24
+    zabbix_metadata: kpmg-prod
+  children:
+    mapro:
+      vars:
+        file_beat_path: /opt/taxilla/logs/taxilla.log
+      children:
+        mapro_encomply:
+          vars:
+            category: '-'
+          hosts:
+            kpmg-prod-encomply-mapro-1:
+              ansible_host: 10.0.2.121
+            kpmg-prod-encomply-mapro-2:
+              ansible_host: 10.0.4.247
+            kpmg-prod-encomply-mapro-3:
+              ansible_host: 10.0.2.134
+            kpmg-prod-encomply-mapro-addon1:
+              ansible_host: 10.0.4.102
+            kpmg-prod-encomply-mapro-addon2:
+              ansible_host: 10.0.4.242
+            kpmg-prod-encomply-mapro-addon3:
+              ansible_host: 10.0.4.44
+        mapro_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            kpmg-prod-eninvoice-mapro-1:
+              ansible_host: 10.0.4.171
+            kpmg-prod-eninvoice-mapro-2:
+              ansible_host: 10.0.2.193
+            kpmg-prod-eninvoice-mapro-3:
+              ansible_host: 10.0.2.42
+            kpmg-prod-eninvoice-mapro-4:
+              ansible_host: 10.0.4.213
+            kpmg-prod-eninvoice-mapro-5:
+              ansible_host: 10.0.4.155
+            kpmg-prod-eninvoice-mapro-6:
+              ansible_host: 10.0.4.213
+            kpmg-prod-eninvoice-mapro-7:
+              ansible_host: 10.0.4.203
+            kpmg-prod-eninvoice-mapro-8:
+              ansible_host: 10.0.4.135
+            kpmg-prod-eninvoice-mapro-9:
+              ansible_host: 10.0.4.186
+            kpmg-prod-eninvoice-mapro-10:
+              ansible_host: 10.0.4.105
+            kpmg-prod-eninvoice-mapro-11:
+              ansible_host: 10.0.2.139
+            kpmg-prod-eninvoice-mapro-12:
+              ansible_host: 10.0.4.23
+            kpmg-prod-eninvoice-mapro-13:
+              ansible_host: 10.0.2.140
+            kpmg-prod-eninvoice-mapro-14:
+              ansible_host: 10.0.2.143
+            kpmg-prod-eninvoice-mapro-15:
+              ansible_host: 10.0.2.214
+            kpmg-prod-eninvoice-mapro-16:
+              ansible_host: 10.0.4.249
+
+
+
+
+    etl:
+      vars:
+        file_beat_path: /opt/etltomcat9037/logs/etl.log
+        heap_memory: 24
+      children:
+        etl_encomply:
+          vars:
+            category: "-"
+          hosts:
+            kpmg-prod-encomply-etl-1:
+              ansible_host: 10.0.2.64
+            kpmg-prod-encomply-etl-2:
+              ansible_host: 10.0.4.95
+            kpmg-prod-encomply-etl-3:
+              ansible_host: 10.0.2.34
+            kpmg-prod-encomply-etl-addon1:
+              ansible_host: 10.0.4.198
+            kpmg-prod-encomply-etl-addon2:
+              ansible_host: 10.0.4.156
+            kpmg-prod-encomply-etl-addon3:
+              ansible_host: 10.0.4.58
+        etl_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            kpmg-prod-eninvoice-etl-1:
+              ansible_host: 10.0.4.240
+            kpmg-prod-eninvoice-etl-2:
+              ansible_host: 10.0.2.83
+            kpmg-prod-eninvoice-etl-3:
+              ansible_host: 10.0.2.108
+            kpmg-prod-eninvoice-etl-4:
+              ansible_host: 10.0.2.75
+            kpmg-prod-eninvoice-etl-5:
+              ansible_host: 10.0.2.105
+            kpmg-prod-eninvoice-etl-6:
+              ansible_host: 10.0.4.63
+            kpmg-prod-eninvoice-etl-7:
+              ansible_host: 10.0.4.125
+            kpmg-prod-eninvoice-etl-8:
+              ansible_host: 10.0.4.188
+    search:
+      vars:
+        file_beat_path: /opt/search-server/logs/search.log
+      children:
+        search_encomply:
+          vars:
+            category: "-"
+          hosts:
+            kpmg-prod-encomply-search-1:
+              ansible_host: 10.0.2.102
+            kpmg-prod-encomply-search-2:
+              ansible_host: 10.0.4.167
+            kpmg-prod-encomply-search-3:
+              ansible_host: 10.0.2.236
+            kpmg-prod-encomply-search-addon1:
+              ansible_host: 10.0.4.12
+            kpmg-prod-encomply-search-addon2:
+                ansible_host: 10.0.4.61
+            kpmg-prod-encomply-search-addon3:
+              ansible_host: 10.0.4.10
+
+        search_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            kpmg-prod-eninvoice-search-1:
+              ansible_host: 10.0.2.210
+            kpmg-prod-eninvoice-search-2:
+              ansible_host: 10.0.4.99
+            kpmg-prod-eninvoice-search-3:
+              ansible_host: 10.0.2.179
+            kpmg-prod-eninvoice-search-4:
+              ansible_host: 10.0.2.211
+            kpmg-prod-eninvoice-search-5:
+              ansible_host: 10.0.2.189
+            kpmg-prod-eninvoice-search-6:
+              ansible_host: 10.0.4.161
+            kpmg-prod-eninvoice-search-7:
+              ansible_host: 10.0.4.230
+            kpmg-prod-eninvoice-search-8:
+              ansible_host: 10.0.4.194
+
+    user:
+      vars:
+        mysql_hostname: kpmg-3nodenstage.cyj7oiefiusa.ap-south-1.rds.amazonaws.com
+        mysql_user: root
+        mysql_password: Password$321
+        eb_base_path: /opt/enTransact/envoice-server
+      hosts:
+        kpmg-prod-user-eb-utilities-1:
+          ansible_host: 10.0.2.73
+        kpmg-prod-user-eb-utilities-2:
+          ansible_host: 10.0.4.4
+        kpmg-prod-user-eb-utilities-3:
+          ansible_host: 10.0.2.98
+    eninvoice-backend:
+      vars:
+        property_file: kpmg-prod_eninvoice.properties
+      hosts:
+        kpmg-prod-user-eb-utilities-1:
+          ansible_host: 10.0.2.73
+        kpmg-prod-user-eb-utilities-2:
+          ansible_host: 10.0.4.4
+        kpmg-prod-user-eb-utilities-3:
+          ansible_host: 10.0.2.98
+    vdm:
+      vars:
+        properties_file: macre.properties_kpmg-prod
+      hosts:
+        kpmg-prod-vdm:
+          ansible_host: 10.0.3.49
+    nginx:
+      hosts:
+        kpmg-prod-nginx-1:
+          ansible_host: 10.0.2.156
+        kpmg-prod-nginx-2:
+          ansible_host: 10.0.2.19
+        kpmg-prod-nginx-3:
+          ansible_host: 10.0.4.30
+    zookeeper:
+      hosts:
+        kpmg-prod-zookeeper-1:
+          ansible_host: 10.0.2.244
+          node_id: 1
+        kpmg-prod-zookeeper-2:
+          ansible_host: 10.0.4.231
+          node_id: 2
+        kpmg-prod-zookeeper-3:
+          ansible_host: 10.0.2.147
+          node_id: 3
+    hazelcast:
+      vars:
+        hazelcast_name: kpmg-prod
+      hosts:
+        kpmg-prod-hazelcast-1:
+          ansible_host: 10.0.2.131
+        kpmg-prod-hazelcast-2:
+          ansible_host: 10.0.2.146
+        kpmg-prod-hazelcast-3:
+          ansible_host: 10.0.2.194
+
+    kafka:
+      hosts:
+        kpmg-prod-kafka-1:
+          ansible_host: 10.0.2.29
+          broker_id: 1
+        kpmg-prod-kafka-2:
+          ansible_host: 10.0.4.129
+          broker_id: 2
+        kpmg-prod-kafka-3:
+          ansible_host: 10.0.2.188
+          broker_id: 3
+    gst:
+      hosts:
+        kpmg-prod-gst-wrapper-1:
+          ansible_host: 10.0.2.12
+        kpmg-prod-gst-wrapper-2:
+          ansible_host: 10.0.4.39
+        kpmg-prod-gst-wrapper-3:
+          ansible_host: 10.0.2.253
+    es:
+      hosts:
+        kpmg-prod-elastic-search-1:
+          ansible_host: 10.0.2.55
+        kpmg-prod-elastic-search-2:
+          ansible_host: 10.0.2.207
+        kpmg-prod-elastic-search-3:
+          ansible_host: 10.0.2.203
+        kpmg-prod-elastic-search-4:
+          ansible_host: 10.0.2.138
+        kpmg-prod-elastic-search-5:
+          ansible_host: 10.0.4.66
+        kpmg-prod-elastic-search-6:
+          ansible_host: 10.0.2.54
+    tods:
+      vars:
+        cluster_name: kpmgstage3node_cluster
+        dc: kpmgstage3node
+        rack: stage3node
+        jdk: java-1.8.0-openjdk
+        seeds:
+          - 10.0.1.83
+          - 10.0.1.183
+          - 10.0.0.99
+      hosts:
+        kpmg-prod-tod-1:
+          ansible_host: 10.0.1.83
+        kpmg-prod-tod-2:
+          ansible_host: 10.0.1.183
+        kpmg-prod-tod-3:
+          ansible_host: 10.0.0.47
+        kpmg-prod-tod-4:
+          ansible_host: 10.0.0.98
+        kpmg-prod-tod-5:
+          ansible_host: 10.0.0.99
+        kpmg-prod-tod-6:
+          ansible_host: 10.0.0.100
+        kpmg-prod-tod-7:
+          ansible_host: 10.0.2.46
+        kpmg-prod-tod-8:
+          ansible_host: 10.0.2.82
+        kpmg-prod-tod-9:
+          ansible_host: 10.0.2.199
+    reaper:
+      vars:
+        jdk: java-1.8.0-openjdk
+        db_name: reaper_db
+        db_user: reaper
+        db_password: Adq$123
+      hosts:
+        kpmg-production-reaper-1:
+          ansible_host: 192.168.10.30
+
+
+#    zabbix:
+#      hosts:
+#        kpmg-prod-zabbix-server:
+#          ansible_host: 10.0.3.243

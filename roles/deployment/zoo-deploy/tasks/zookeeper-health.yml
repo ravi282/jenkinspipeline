@@ -1,0 +1,4 @@
+---
+#health check for zookeeper
+- name: zookeeper service health check
+  shell: "nc -vz localhost 2181"

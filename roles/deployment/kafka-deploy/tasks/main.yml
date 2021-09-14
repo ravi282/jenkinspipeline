@@ -1,0 +1,20 @@
+---
+# tasks file for kafka-deploy
+- include: kafka-stop.yml
+  tags:
+    - kafka-stop
+    - kafka-restart
+    - never
+- include: kafka-start.yml
+  tags:
+    - kafka-start
+    - kafka-restart
+    - never
+- include: kafka-health.yml
+  tags:
+    - never
+    - kafka-health
+    - health
+- include: ncat-config.yml
+  tags:
+    - ncat

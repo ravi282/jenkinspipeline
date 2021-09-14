@@ -1,0 +1,17 @@
+---
+# tasks file for filebeat
+
+- name: update config file
+  template:
+    src: filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+  tags:
+    - filebeat
+- name: Make sure a service is running
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: filebeat
+  tags:
+    - filebeat
+    - filebeat-restart

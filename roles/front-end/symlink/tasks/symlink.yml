@@ -1,0 +1,11 @@
+---
+- name: create symlink for eninvoice
+  file:
+    src: "{{ eisrc }}"
+    dest: "{{ eidest }}"
+    state: link
+- name: create symlink for enreport
+  file:
+    src: "{{ ersrc }}"
+    dest: "{{ erdest }}"
+    state: link

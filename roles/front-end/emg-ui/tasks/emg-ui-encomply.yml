@@ -1,0 +1,22 @@
+---
+# encomply ui deployment.
+- name: ensure encomply backup  directory is on home directory
+  file:
+    path: "{{ ec_backup_path }}"
+    state: directory
+
+- name: ensure encomply directory is on nginx
+  file:
+    path: "{{ ec_base_path }}/app"
+    state: directory
+
+- name: taking the backup of app folder
+  shell: "mv {{ ec_base_path }}/app {{ ec_backup_path }}/app_$(date +%d-%m-%Y_%H-%M-%S)"
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ ec_artifact_path }}"
+    dest: "{{ ec_base_path }}"
+
+- name: rename the directory encomply-ui to app
+  command: "mv {{ ec_base_path }}/encomply-ui {{ ec_base_path }}/app"

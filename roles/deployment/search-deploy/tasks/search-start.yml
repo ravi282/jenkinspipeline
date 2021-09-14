@@ -1,0 +1,6 @@
+---
+# search strat
+- name: start serach server
+  shell:
+    chdir: /opt/search-server/
+    cmd: /usr/bin/nohup /bin/sh startup.sh

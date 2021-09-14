@@ -1,0 +1,73 @@
+---
+# tasks file for vncserver
+- set_fact:
+    user: "{{ item }}"
+
+- name: makesure users are exist.
+  user:
+    name: "{{ user }}"
+    shell: /bin/bash
+  become: yes
+  become_user: root
+
+- name: get files count
+  shell: ls -ltr /etc/systemd/system | grep vnc |wc -l
+  register: id
+
+- name: Display all variables/facts known for a host
+  debug:
+    msg: "{{ id }}"
+
+- block:
+  - name: copy password template
+    template:
+      src: "vncpassword.sh.j2"
+      dest: "~/vncpassword.sh"
+
+  - name: password change
+    shell: sh ~/vncpassword.sh
+
+  - name: copy xstartup
+    copy:
+      src: "xstartup"
+      dest: "~/.vnc/xstartup"
+      mode: '0755'
+  become: yes
+  become_user: "{{ user }}"
+
+- block:
+  - name: create ssh folder in home directory for {{ user }}
+    file:
+      path: /home/{{ user }}/.ssh
+      state: directory
+      owner: "{{ user }}"
+      group: "{{ user }}"
+      mode: '0700'
+
+  - name: copy authorized_keys key file for {{ user }}
+    shell: cp -prv /home/ubuntu/.ssh/authorized_keys /home/{{ user }}/.ssh/authorized_keys
+    when: user != "ubuntu"
+
+  - name: Give insecure permissions to an existing file
+    file:
+      path: /home/{{ user }}/.ssh/authorized_keys
+      owner: "{{ user }}"
+      group: "{{ user }}"
+
+  - name: configure the service
+    template:
+      src: "vncservice.server.j2"
+      dest: /etc/systemd/system/vncserver-{{ user }}@{{ id.stdout | int + 1}}.service
+
+  - name: just force systemd to reread configs (2.4 and above)
+    systemd:
+      daemon_reload: yes
+
+  - name: enable service vncserver-{{ user }}@{{ id.stdout | int + 1}}.service and ensure it is not masked
+    systemd:
+      name: vncserver-{{ user }}@{{ id.stdout | int + 1}}.service
+      enabled: yes
+      masked: no
+  become: yes
+  become_user: root
+

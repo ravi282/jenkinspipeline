@@ -1,0 +1,45 @@
+---
+- name: remove zabbix agent
+  yum:
+    name: "{{ packages }}"
+    state: absent
+  vars:
+    packages:
+      - zabbix-agent
+
+- name: yum clean cache
+  shell: "yum clean all"
+
+- name: install zabbix repository
+  yum:
+    name: "{{ zabbix_repo }}"
+    state: latest
+
+- name: install zabbix agent
+  yum:
+    name: zabbix-agent
+    state: latest
+
+- name: Make sure a service is running
+  systemd:
+    state: started
+    name: zabbix-agent
+
+- name: update configuration file
+  template:
+    src: "zabbix_agentd.conf.j2"
+    dest: "/etc/zabbix/zabbix_agentd.conf"
+  tags:
+    - zabbix-config
+
+- name: Make sure a service is running
+  systemd:
+    state: restarted
+    name: zabbix-agent
+  tags:
+    - zabbix-restart
+
+- name: Make sure a service is enabled in startup
+  systemd:
+    name: zabbix-agent
+    enabled: yes

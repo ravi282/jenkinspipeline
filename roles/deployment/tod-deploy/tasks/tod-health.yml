@@ -1,0 +1,5 @@
+---
+- name: healthcheck for cassandra
+  shell:
+    chdir: "{{ tod_base_path }}/bin"
+    cmd: "/usr/bin/nohup /bin/sh nodetool status"

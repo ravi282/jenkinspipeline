@@ -1,0 +1,17 @@
+---
+# tasks file for utilities-deploy
+- include: utilities-stop.yml
+  tags:
+    - utilities-stop
+    - utilities-deploy
+    - utilities-restart
+    - never
+- include: utilities-deploy.yml
+  tags:
+    - utilities-deploy
+    - never
+- include: utilities-start.yml
+  tags:
+    - utilities-deploy
+    - utilities-restart
+    - never

@@ -1,0 +1,14 @@
+---
+# defaults file for eninvoice-backend
+process_name: envoice
+user: taxadmin
+group: taxadmin
+env: develop
+
+eb_base_path: /opt/enTransact/envoice-server
+backup_path: ~/backups
+ebport: 7656
+
+artifact_base: ~/ansible/artifacts
+#artifact_path: "{{ artifact_base }}/eninvoice-backend.zip"
+data_directory: /var/enTransactData

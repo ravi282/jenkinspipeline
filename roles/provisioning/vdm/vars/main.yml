@@ -1,0 +1,4 @@
+---
+# vars file for vdm
+process_name: vdm
+user_name: taxadmin

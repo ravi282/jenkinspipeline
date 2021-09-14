@@ -1,0 +1,41 @@
+---
+- name: download kafka binary file
+  unarchive:
+    src: "{{ artifact_path }}"
+    dest: /opt
+    remote_src: yes
+
+- name: updating heam memory.
+  template:
+    dest: "{{ base_path }}/bin/kafka-server-start.sh"
+    src: kafka-server-start.sh.j2
+
+- name: updating server properties
+  template:
+    src: server.properties.j2
+    dest: "{{ kafka_base_path }}/config/server.properties"
+  tags:
+    - kafka-config
+
+- name: changing the ownership
+  file:
+    path: "{{ base_path }}"
+    owner: "{{ user}}"
+    group: "{{ user }}"
+    recurse: yes
+  tags:
+    - kafka-config
+
+- name: create data directory
+  file:
+    path: "{{ kafka_data_folder }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    recurse: yes
+  tags:
+    - kafka-config
+
+
+
+
+

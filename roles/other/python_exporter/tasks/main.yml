@@ -1,0 +1,38 @@
+---
+# tasks file for python_exporter
+- block:
+  - name: install python pip
+    yum:
+      name:
+        - epel-release
+
+  - name: install python pip
+    yum:
+      name:
+        - python-pip
+
+  - name: upgarde pip version
+    shell: 'pip install --upgrade pip'
+  become: yes
+
+
+- name: upgarde pip version
+  pip:
+    name:
+      - prometheus_client
+      - requests
+
+- name: create direcory scripts
+  file:
+    path: ~/scripts
+    state: directory
+
+- name: copy the scripts file
+  template:
+    src: exporter.py.j2
+    dest: ~/scripts/exporter.py
+
+- name: start python script
+  shell: python ~/scripts/exporter.py &
+  tags:
+    - health-start

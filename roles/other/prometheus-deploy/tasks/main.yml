@@ -1,0 +1,6 @@
+---
+# tasks file for prometheus-deploy
+- name: generating config file.
+  template:
+    src: prometheus.yml.j2
+    dest: prometheus.yml

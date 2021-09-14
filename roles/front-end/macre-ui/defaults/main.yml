@@ -1,0 +1,6 @@
+---
+# defaults file for macre-ui
+base_path: /usr/share/nginx/macre
+backup_path: ~/backups/macre
+artifact_base: ~/ansible/artifacts
+artifact_path: "{{ artifact_base }}/macre-ui.zip"

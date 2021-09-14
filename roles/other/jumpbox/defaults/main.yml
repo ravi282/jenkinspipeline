@@ -1,0 +1,4 @@
+---
+# defaults file for jumpbox
+password: "Adq@123"
+geometry: "1600x960"

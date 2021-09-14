@@ -1,0 +1,30 @@
+from prometheus_client import start_http_server, Gauge
+from requests.exceptions import ConnectionError
+import random
+import time
+import requests
+
+url = "{{ health_url }}"
+timeout = 20
+# Create a metric to track time spent and requests made.
+STATUS_CODE = Gauge('request_status', 'status_code')
+STATUS_CODE.set_to_current_time()
+
+
+# Decorate function with metric.
+def process_request():
+    time.sleep(5)
+    try:
+        r = requests.get(url=url, timeout=timeout)
+        print(r.status_code)
+        STATUS_CODE.set(int(r.status_code))
+    except ConnectionError:
+        STATUS_CODE.set(0)
+
+
+if __name__ == '__main__':
+    # Start up the server to expose the metrics.
+    start_http_server(8000)
+    # Generate some requests.
+    while True:
+        process_request()

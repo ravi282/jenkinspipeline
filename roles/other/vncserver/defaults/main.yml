@@ -1,0 +1,4 @@
+---
+# defaults file for vncserver
+password: "Adq@1234"
+geometry: "1600x960"

@@ -1,0 +1,14 @@
+---
+# defaults file for user-deploy
+#process_name: user
+#user: taxadmin
+#group: taxadmin
+#env: develop
+#
+#user_base_path: /opt/user
+#backup_path: ~/backups
+#userport: 9191
+#user_subdirectory: /idm/misc/properties
+#
+##artifact_base: ~/ansible/artifacts
+##artifact_path: "{{ artifact_base }}/user.zip"

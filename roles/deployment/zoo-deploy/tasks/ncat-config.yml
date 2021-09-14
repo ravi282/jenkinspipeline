@@ -1,0 +1,15 @@
+---
+ - name: Download ncat rpm package
+   shell: wget https://nmap.org/dist/ncat-7.60-1.x86_64.rpm
+   become: yes
+   become_user: root
+ - name: Install rpm package
+   shell: rpm -i ncat-7.60-1.x86_64.rpm
+   become: yes
+   become_user: root
+   ignore_errors: true
+ - name: Symlink to nc
+   shell: ln -s /bin/ncat /bin/nc
+   become: yes
+   become_user: root
+   ignore_errors: true

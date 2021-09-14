@@ -1,0 +1,6 @@
+---
+#start taxilla
+- name: start taxilla server
+  shell:
+    chdir: /opt/taxilla/
+    cmd: /usr/bin/nohup /bin/sh startup.sh

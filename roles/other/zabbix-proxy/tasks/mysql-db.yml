@@ -1,0 +1,58 @@
+---
+- name: install mysql repository
+  yum:
+    name: http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+    state: present
+
+- name: install epel relase
+  yum:
+    name: epel-release
+    enablerepo: mysql56-community
+    state: latest
+
+- name: install mysql database
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - gcc
+    - gcc-c++
+    - kernel-devel
+    - mysql-community-server
+    - python2-devel
+    - MySQL-python
+
+- name: zlib download
+  get_url:
+    url: https://zlib.net/zlib-1.2.11.tar.gz
+    dest: /opt
+    mode: 744
+
+- name: unarchive tar file
+  unarchive:
+    src: /opt/zlib-1.2.11.tar.gz
+    dest: /opt/
+    remote_src: yes
+
+- name: change directory
+  shell: cd /opt/zlib-1.2.11/ && ./configure --shared --prefix=/usr && make && make install
+
+- name: start my sqlservice
+  systemd:
+    state: started
+    name: mysqld
+
+- name: Create a new database with name 'zabbix'
+  mysql_db:
+    name: zabbix-proxy
+    state: present
+    encoding: utf8_bin
+
+
+- name: create mysql user
+  mysql_user:
+    name: zabbix
+    password: zabbix
+    priv: '*.*:ALL'
+    state: present
+

@@ -1,0 +1,30 @@
+---
+# macre deployment
+- name: ensure macre directory is on macre server
+  file:
+    path: "{{ base_path }}/webapps"
+    state: directory
+
+- name: ensure macre backup directory is on macre server
+  file:
+    path: "{{ backup_path }}"
+    state: directory
+
+#- name: taking the backup of webapps directory.
+#  shell: "mv {{ macre_base_path}}/webapps {{ backup_path }}/webapps_$(date +%d-%m-%Y_%H-%M-%S)"
+
+- name: remove vdm directory in tomcat
+  file:
+    path: "{{ base_path }}/webapps/vdm"
+    state: absent
+- name: remove vdm.war file in webapps in tomcat
+  file:
+    path: "{{ base_path }}/webapps/vdm.war"
+    state: absent
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ artifact_path }}"
+    dest: "{{ base_path }}/webapps"
+    remote_src: yes
+

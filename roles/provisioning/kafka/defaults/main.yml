@@ -1,0 +1,9 @@
+---
+# defaults file for kafka
+process_name: kafka
+user: taxadmin
+base_path: /opt/kafka_2.12-2.5.0
+kafka_data_folder: /var/kafka
+heap_memory: 6
+artifact_path: "http://35.175.83.118:8081/repository/taxilla-softwares/kafka/kafka_2.12-2.5.0.tgz"
+offsets_topic_replication_factor: 3

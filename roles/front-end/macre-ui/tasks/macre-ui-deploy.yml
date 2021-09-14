@@ -1,0 +1,32 @@
+---
+# macre ui
+- name: ensure app directory is on nginx
+  file:
+    path: "{{ macreui_base_path }}/app"
+    state: directory
+
+- name: ensure backups directory is on nginx
+  file:
+    path: "{{ macreui_base_path }}/app"
+    state: directory
+
+#- name: taking the backup of app folder
+#  shell: "mv {{base_path}}/app {{ backup_path }}/app_$(date +%d-%m-%Y_%H-%M-%S)"
+- name: remove apps directory is on nginx
+  file:
+    path: "{{ macreui_base_path }}/app"
+    state: absent
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ macreui_artifact_path }}"
+    dest: "{{ macreui_base_path }}"
+    remote_src: yes
+
+- name: rename the macre-front of app folder
+  shell:
+    chdir: "{{ macreui_base_path }}"
+    cmd: mv macre-frontend app
+
+- name: nginx restart
+  shell: "sudo  service nginx restart"

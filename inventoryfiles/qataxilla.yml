@@ -1,0 +1,282 @@
+---
+all:
+  vars:
+    ansible_user: centos
+    elk: 10.0.0.136
+    user: taxadmin
+    group: taxadmin
+    project_name: qataxilla
+    ansible_ssh_private_key_file: ~/.ssh/pemfiles/encomplyQA.pem
+    zabbix_server: 10.0.0.34
+    version: 3.4.8
+    tax_port: 8282
+    etl_port: 8080
+    es_port: 9200
+    macre_port: 8080
+    search_port: 8383
+    user_port: 8181
+    eb_port: 7656
+    macre_health_url: /api/properties
+    es_health_url: /_cat/health
+    tax_health_url: /mapro/application-properties
+    etl_health_url: /etl/rest/etl
+    search_health_url: /search/healthcheck
+    user_health_url: /users
+    ## Setup Properties for mapro,etl,search
+    ## user setup properties
+    mysql_hostname: taxilla-prodcutiondb-instance.clquipaonlfp.ap-south-1.rds.amazonaws.com
+    mysql_user: root
+    mysql_password: Password$321
+    access: AKIAJD77LECDCLZ5Z3WQ
+    secret: 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
+    zabbix_metadata: qa-taxilla
+    default_user: centos
+  children:
+    mapro:
+      vars:
+        process_name: taxilla
+        base_path: /opt/taxilla
+        backup_path: ~/backups
+        health_url: http://localhost:{{ tax_port }}/mapro/application-properties
+        jgroup_cluster_name: jgroups-encomplyqa-cluster
+        heap_memory: 8
+        file_beat_path: /opt/taxilla/logs/taxilla.log
+        tmp_dir: /var/taxilla
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/qataxilla/dev/qataxilla-dev-mapro.zip
+      children:
+        mapro_encomply:
+          vars:
+            category: '-'
+          hosts:
+            qataxilla-mapro-encomply-01:
+              ansible_host: 10.0.1.126
+            qataxilla-mapro-encomply-02:
+              ansible_host: 10.0.3.194
+            qataxilla-mapro-encomply-03:
+              ansible_host: 10.0.1.251
+        mapro_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            qataxilla-mapro-eninvoice-01:
+              ansible_host: 10.0.1.57
+    etl:
+      vars:
+        process_name: etl
+        tomcat_url: https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.37/bin/apache-tomcat-9.0.37.zip
+        base_path: /opt/etltomcat9037
+        file_beat_path: /opt/etltomcat9037/logs/etl.log
+        heap_memory: 24
+        CATALINA_TMPDIR: "/var/etl"
+        health_url: http://localhost:{{ etl_port }}/etl/rest/etl
+        jgroup_cluster_name: jgroups-encomplyqa-cluster
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/qataxilla/dev/qataxilla-dev-etl.zip
+      children:
+        etl_encomply:
+          vars:
+            category: '-'
+          hosts:
+            qataxilla-etl-encomply-01:
+              ansible_host: 10.0.1.53
+            qataxilla-etl-encomply-02:
+              ansible_host: 10.0.3.173
+            qataxilla-etl-encomply-03:
+              ansible_host: 10.0.3.188
+        etl_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            qataxilla-etl-eninvoice-01:
+              ansible_host: 10.0.3.211
+
+    search:
+      vars:
+        process_name: search
+        search_subdirectory: /search
+        jgroup_cluster_name: jgroups-encomplyqa-cluster
+        base_path: /opt/search-server
+        file_beat_path: "{{ base_path }}/logs/search.log"
+        health_url: http://localhost:{{ search_port }}/search/healthcheck
+        heap_memory: 8
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/qataxilla/dev/qataxilla-dev-search.zip
+      children:
+        search_encomply:
+          vars:
+            category: '-'
+          hosts:
+            qataxilla-search-encomply-01:
+              ansible_host: 10.0.1.108
+            qataxilla-search-encomply-02:
+              ansible_host: 10.0.3.151
+            qataxilla-search-encomply-03:
+              ansible_host: 10.0.5.58
+        search_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            qataxilla-search-eninvoice-01:
+              ansible_host: 10.0.3.39
+
+    user:
+      vars:
+        mysql_hostname: qataxilla-db-nat.ct1wpolsefla.us-west-2.rds.amazonaws.com
+        schema_name: user_pqa
+        mysql_user: root
+        mysql_password: Password$321
+        file_beat_path: /opt/user/logs/application.log
+        qr_code_url: internal-QATaxilla-GoogleUtilities-LB-2005481982.us-west-2.elb.amazonaws.com
+        heap_memory: 8
+        process_name: user
+        user_base_path: /opt/user
+        backup_path: ~/backups
+        user_subdirectory: http://localhost:{{ user_port }}/idm/misc/properties
+        user_artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/qataxilla/dev/qataxilla-dev-user.zip
+      hosts:
+        qataxilla-kafka-user-1:
+          ansible_host: 10.0.1.207
+        qataxilla-kafka-user-2:
+          ansible_host: 10.0.1.145
+        qataxilla-kafka-user-3:
+          ansible_host: 10.0.1.225
+
+    kafka:
+      hosts:
+        qataxilla-kafka-user-1:
+          ansible_host: 10.0.1.207
+        qataxilla-kafka-user-2:
+          ansible_host: 10.0.1.145
+        qataxilla-kafka-user-3:
+          ansible_host: 10.0.1.225
+
+    property:
+      vars:
+        base_path: /opt/property-loader
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/qataxilla/dev/qataxilla-dev-property.zip
+      hosts:
+        qataxilla-zookeeper-1:
+          ansible_host: 10.0.1.147
+
+    zookeeper:
+      hosts:
+        qataxilla-zookeeper-1:
+          ansible_host: 10.0.1.147
+        qataxilla-zookeeper-2:
+          ansible_host: 10.0.1.142
+        qataxilla-zookeeper-3:
+          ansible_host: 10.0.1.4
+
+    elastic-search:
+      hosts:
+        qataxilla-es-1:
+          ansible_host: 10.0.1.199
+        qataxilla-es-2:
+          ansible_host: 10.0.3.143
+        qataxilla-es-3:
+          ansible_host: 10.0.5.89
+
+    nginx:
+      vars:
+        base_path: /usr/share/nginx
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/qataxilla/dev/qataxilla-dev-taxillaui.zip
+      hosts:
+        qataxilla-nginx-1:
+          ansible_host: 10.0.1.231
+        qataxilla-nginx-2:
+          ansible_host: 10.0.3.172
+        qataxilla-nginx-3:
+          ansible_host: 10.0.3.18
+
+    macreui:
+      vars:
+        macreui_base_path: /usr/share/nginx/macre
+        macreui_artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/qataxilla/dev/qataxilla-dev-macreui.zip
+      hosts:
+        qataxilla-nginx-1:
+          ansible_host: 10.0.1.231
+        qataxilla-nginx-2:
+          ansible_host: 10.0.3.172
+        qataxilla-nginx-3:
+          ansible_host: 10.0.3.18
+
+    vdm:
+      vars:
+        process_name: vdm
+        health_url: http://localhost:{{ macre_port }}/vdm/api/properties
+        base_path: /opt/vdmtomcat9037/
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/qataxilla/dev/qataxilla-dev-vdm.zip
+      hosts:
+        qataxilla-vdm-eb:
+          ansible_host: 10.0.0.34
+
+    eb:
+      vars:
+        eb_process_name: eninvoice
+        eb_health_url: http://localhost:{{eb_prot}}/
+        eb_base_path: /opt/envoice-server
+        eb_artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/qataxilla/dev/qataxilla-dev-eninvoice.zip
+      hosts:
+        qataxilla-eninvoice-backend:
+          ansible_host: 10.0.0.34
+
+    utils:
+      vars:
+        process_name: application
+        base_path: /opt/utilities_gmap
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/qataxilla/dev/qataxilla-dev-gmap.zip
+      hosts:
+        qataxilla-utils-1:
+          ansible_host: 10.0.3.189
+        qataxilla-utils-2:
+          ansible_host: 10.0.3.34
+        qataxilla-utils-3:
+          ansible_host: 10.0.1.99
+
+    tods:
+      vars:
+        process_name: cassandara
+        base_path: /opt/apache-cassandra-3.9
+        hints_directory: /var/cassandra/hints
+        data_directory:
+          - /var/cassandra/data
+        commitlog_directory: /var/cassandra/commitlog
+        saved_caches_directory: /var/cassandra/saved_caches
+        MAX_HEAP_SIZE: 32
+        HEAP_NEWSIZE: 800
+        cluster_name: encomplyQA_cluster
+        dc: dc1
+        rack: rack1
+        jdk: java-1.8.0-openjdk
+        tod_artifact_path: https://archive.apache.org/dist/cassandra/3.9/apache-cassandra-3.9-bin.tar.gz
+        seeds:
+          - 10.0.1.82
+          - 10.0.1.159
+          - 10.0.1.157
+      hosts:
+        qataxilla-tod-1:
+          ansible_host: 10.0.1.82
+        qataxilla-tod-2:
+          ansible_host: 10.0.1.155
+        qataxilla-tod-3:
+          ansible_host: 10.0.1.157
+
+    reaper:
+      vars:
+        jdk: java-1.8.0-openjdk
+        db_name: reaper_db
+        db_user: reaper
+        db_password: Adq$123
+      hosts:
+        qataxilla-reaper-1:
+          ansible_host: 192.168.10.30
+
+    jumpbox:
+      vars:
+        ansible_user: ubuntu
+        users:
+          - ubuntu
+        password: Adq@1234
+        ansible_python_interpreter: /usr/bin/python3
+      hosts:
+        qa-taxilla-reaper-jumpbox:
+          ansible_host: 34.222.51.72
+

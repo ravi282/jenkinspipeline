@@ -1,0 +1,15 @@
+- name: delete old folder
+  file:
+    path: "{{ base_path }}/application"
+    state: absent
+
+- name: extract the utlities artifact
+  unarchive:
+    dest: "{{ base_path }}"
+    src: "{{ artifact_path }}"
+    remote_src: yes
+    owner: "{{ user }}"
+    group: "{{ group }}"
+
+
+

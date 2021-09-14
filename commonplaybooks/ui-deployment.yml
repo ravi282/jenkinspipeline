@@ -1,0 +1,19 @@
+---
+- hosts: nginx
+  become: yes
+  become_user: taxadmin
+  roles:
+    - ui
+    - emg-ui
+    - symlink
+
+- hosts: macreui
+  become: yes
+  become_user: taxadmin
+  roles:
+    - macre-ui
+#- hosts: vdm
+#  become: yes
+#  become_user: root
+#  roles:
+#    - macre-ui

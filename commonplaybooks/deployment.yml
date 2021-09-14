@@ -1,0 +1,88 @@
+---
+- hosts: user
+  become: yes
+  become_user: taxadmin
+  roles:
+    - user-deploy
+
+- hosts: eb
+  become: yes
+  become_user: taxadmin
+  roles:
+    - eb-deploy
+
+
+- hosts: mapro
+  become: yes
+  become_user: taxadmin
+  roles:
+    - mapro-deploy
+
+- hosts: etl
+  become: yes
+  become_user: taxadmin
+  roles:
+    - etl-deploy
+
+- hosts: search
+  become: yes
+  become_user: taxadmin
+  roles:
+    - search-deploy
+
+- hosts: vdm
+  become: yes
+  become_user: taxadmin
+  roles:
+    - macre-deploy
+
+
+- hosts: zookeeper
+  become: yes
+  become_user: taxadmin
+  roles:
+    - zoo-deploy
+
+- hosts: kafka
+  become: yes
+  become_user: taxadmin
+  roles:
+    - kafka-deploy
+
+- hosts: tods
+  become: yes
+  become_user: taxadmin
+  roles:
+    - tod-deploy
+
+- hosts: elastic_search
+  become: yes
+  become_user: taxadmin
+  roles:
+    - es-deploy
+
+- hosts: property
+  become: yes
+  become_user: taxadmin
+  roles:
+    - pr-deploy
+
+- hosts: utils
+  become: yes
+  become_user: taxadmin
+  roles:
+    - utilities-deploy
+
+- hosts: nginx
+  become: yes
+  become_user: taxadmin
+  roles:
+      - ui
+      - emg-ui
+      - symlink
+
+- hosts: macreui
+  become: yes
+  become_user: taxadmin
+  roles:
+      - macre-ui

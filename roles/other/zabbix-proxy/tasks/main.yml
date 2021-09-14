@@ -1,0 +1,4 @@
+---
+# tasks file for zabbix-proxy
+- include: mysql-db.yml
+- include: zabbix-proxy.yml

@@ -1,0 +1,41 @@
+---
+- name: Ensure hostname set
+  hostname: name={{ inventory_hostname }}
+  tags:
+    - hostname
+
+- name: Add or modify nofile, both soft and hard, limit for the user taxadmin with a comment.
+  pam_limits:
+    domain: taxadmin
+    limit_type: '-'
+    limit_item: nofile
+    value: "100000"
+    comment: 100000 nofile for taxadmin
+
+- name: Add or nproc, both soft and hard, limit for the user taxadmin with a comment.
+  pam_limits:
+    domain: taxadmin
+    limit_type: '-'
+    limit_item: nproc
+    value: "32768"
+    comment: 32768 nproc for taxadmin.
+
+- name: crate "{{ user }}" user
+  user:
+    name: "{{ user }}"
+
+- name: install jdk 11
+  yum:
+    name:
+      - java-11-openjdk-devel
+    state: present
+
+- name: install unzip
+  package:
+    name: unzip
+    state: present
+
+- name: taxdmin alias
+  lineinfile:
+    path: /home/{{ ansible_user }}/.bash_profile
+    line: alias tax='sudo su - taxadmin'

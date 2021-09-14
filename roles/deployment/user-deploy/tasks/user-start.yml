@@ -1,0 +1,6 @@
+---
+#user start
+- name: start user server
+  shell:
+    chdir: "{{ user_base_path }}"
+    cmd: /usr/bin/nohup /bin/sh startup.sh

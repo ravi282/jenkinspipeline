@@ -1,0 +1,17 @@
+---
+# tasks file for es-deploy
+- include: es-stop.yml
+  tags:
+    - es-stop
+    - es-restart
+    - never
+- include: es-start.yml
+  tags:
+    - es-start
+    - es-restart
+    - never
+- include: es-health.yml
+  tags:
+    - never
+    - es-health
+    - health

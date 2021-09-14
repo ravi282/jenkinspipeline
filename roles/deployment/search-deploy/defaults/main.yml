@@ -1,0 +1,14 @@
+---
+# defaults file for search-deploy
+process_name: search
+user: taxadmin
+group: taxadmin
+env: develop
+base_path: /opt/search-server
+backup_path: ~/backups
+
+search_subdirectory: /search
+
+
+artifact_base: ~/ansible/artifacts
+artifact_path: "{{ artifact_base }}/search.zip"

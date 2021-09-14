@@ -1,0 +1,42 @@
+---
+#search setup
+- name: verifying for all the varibles declaration.
+  fail: msg="Variable '{{ item }}' is not defined"
+  when: item not in hostvars[inventory_hostname]
+  with_items:
+    - jgroup_cluster_name
+    - category
+
+- name: create {{ base_path }}/properties directory path.
+  file:
+    path: "{{ base_path }}/properties"
+    state: directory
+
+- name: creating startup.sh file
+  template:
+    src: "startup.sh.j2"
+    dest: "{{ base_path }}/startup.sh"
+  tags:
+    - update-startup
+
+- name: creating jgroups s3 file
+  template:
+    src: "jgroups_s3_config.xml.j2"
+    dest: "{{ base_path }}/properties/jgroups_s3_config.xml"
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ artifact_path }}"
+    dest: "{{ base_path }}"
+
+- name: change the permissions for {{ base_path }}.
+  file:
+    path: "{{ base_path }}"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+    mode: '0755'
+    recurse: true
+  tags:
+    - update-startup
+
+

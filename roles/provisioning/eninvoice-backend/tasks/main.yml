@@ -1,0 +1,4 @@
+---
+# tasks file for eninvoice-backend
+- include: eb-setup.yml
+

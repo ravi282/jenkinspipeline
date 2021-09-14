@@ -1,0 +1,5 @@
+---
+# defaults file for es-deploy
+es_base_path: /opt/elasticsearch-7.3.0
+user: taxadmin
+process_name: elastic

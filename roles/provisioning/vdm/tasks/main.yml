@@ -1,0 +1,4 @@
+---
+# tasks file for vdm
+- include: vdm-setup.yml
+

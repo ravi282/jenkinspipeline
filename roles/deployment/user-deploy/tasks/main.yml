@@ -1,0 +1,23 @@
+---
+# tasks file for user-deploy
+- include: user-stop.yml
+  tags:
+    - never
+    - user-stop
+    - user-deploy
+    - user-restart
+- include: user-deployment.yml
+  tags:
+    - never
+    - user-deploy
+- include: user-start.yml
+  tags:
+    - never
+    - user-deploy
+    - user-restart
+    - user-start
+- include: user-health.yml
+  tags:
+    - never
+    - user-health
+    - health

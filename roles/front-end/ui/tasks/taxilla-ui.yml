@@ -1,0 +1,26 @@
+---
+# taxilla common ui deployment.
+- name: ensure taxillaui directory is on nginx
+  file:
+    path: "{{ base_path }}/taxilla-ui"
+    state: directory
+
+#- name: taking the backup of app folder
+#  shell: "mv {{ ec_base_path }}/app {{ ec_backup_path }}/app_$(date +%d-%m-%Y_%H-%M-%S)"
+
+- name: ensure taxillaui directory is on nginx
+  file:
+    path: "{{ base_path }}/taxilla-ui"
+    state: absent
+
+- name: unzip taxilla-ui artifact
+  unarchive:
+    src: "{{ artifact_path }}"
+    dest: "{{ base_path }}"
+    remote_src: yes
+
+- name: nginx restart
+  shell: "sudo  service nginx restart"
+
+
+

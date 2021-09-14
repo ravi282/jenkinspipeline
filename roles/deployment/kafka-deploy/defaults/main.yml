@@ -1,0 +1,6 @@
+---
+# defaults file for kafka-deploy
+kafka_base_path: /opt/kafka_2.12-2.5.0
+user: taxadmin
+process_name: kafka
+kafka_data_folder: /var/kafka

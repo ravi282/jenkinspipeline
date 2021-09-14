@@ -1,0 +1,5 @@
+---
+#health check for etl
+- name: etl service health check
+  uri:
+    url: "http://localhost:{{ etl_port }}{{ etl_health_url }}"

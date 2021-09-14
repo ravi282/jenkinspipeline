@@ -1,0 +1,207 @@
+---
+all:
+  vars:
+    user: taxadmin
+    group: taxadmin
+    ansible_user: centos
+    ansible_ssh_private_key_file: ~/.ssh/pemfiles/KPMG-3node-stage.pem
+    eisrc: "/usr/share/nginx/eninvoice/app"
+    zabbix_server: 10.0.3.243
+    tax_port: 8080
+    etl_port: 8080
+    search_port: 8383
+    user_port: 8181
+    tax_health_url: /mapro/application-properties
+    etl_health_url: /etl/rest/etl
+    search_health_url: /search/healthcheck
+    user_health_url: /users
+    jgroup_s3_bucket_name: kpmg-3nodestage-jgroup
+    elk: 192.168.1.54
+
+  children:
+    mapro:
+      vars:
+        file_beat_path: /opt/taxilla/logs/taxilla.log
+      hosts:
+        kpmg-2a-mapro-1:
+          ansible_host: 192.168.1.54
+        kpmg-2a-mapro-2:
+          ansible_host: 192.168.1.167
+        kpmg-2a-mapro-3:
+          ansible_host: 192.168.1.211
+        kpmg-2a-mapro-4:
+          ansible_host: 192.168.1.168
+        kpmg-2a-mapro-5:
+          ansible_host: 192.168.1.169
+        kpmg-2a-mapro-6:
+          ansible_host: 192.168.1.186
+
+
+    etl:
+      vars:
+        file_beat_path: /opt/etltomcat9037/logs/etl.log
+      hosts:
+        kpmg-2a-etl-1:
+          ansible_host: 192.168.1.171
+        kpmg-2a-etl-2:
+          ansible_host: 192.168.1.172
+        kpmg-2a-etl-3:
+          ansible_host: 192.168.1.221
+        kpmg-2a-etl-4:
+          ansible_host: 192.168.1.173
+        kpmg-2a-etl-5:
+          ansible_host: 192.168.1.174
+        kpmg-2a-etl-6:
+          ansible_host: 192.168.1.132
+
+
+    search:
+      vars:
+        file_beat_path: /opt/search-server/logs/search.log
+      hosts:
+        kpmg-2a-search-1:
+          ansible_host: 192.168.1.163
+        kpmg-2a-search-2:
+          ansible_host: 192.168.1.164
+        kpmg-2a-search-3:
+          ansible_host: 192.168.1.201
+        kpmg-2a-search-4:
+          ansible_host: 192.168.1.150
+        kpmg-2a-search-5:
+          ansible_host: 192.168.1.133
+        kpmg-2a-search-6:
+          ansible_host: 192.168.1.135
+
+    user:
+      vars:
+        file_beat_path: /opt/user/logs/application.log
+      hosts:
+        kpmg-2a-kafka-user-1:
+          ansible_host: 192.168.1.160
+        kpmg-2a-kafka-user-2:
+          ansible_host: 192.168.1.161
+        kpmg-2a-kafka-user-3:
+          ansible_host: 192.168.1.162
+
+    tods:
+      vars:
+        base_path: /opt/apache-cassandra-3.9
+        hints_directory: /var/cassandra/hints
+        data_directory_0: /var/cassandra/data0
+        data_directory_1: /var/cassandra/data1
+        commitlog_directory: /var/cassandra/commitlog
+        saved_caches_directory: /var/cassandra/saved_caches
+        MAX_HEAP_SIZE: 32
+        HEAP_NEWSIZE: 800
+        tod_artifact_path: http://35.175.83.118:8081/repository/taxilla-softwares/cassandra/apache-cassandra-3.9-bin.tar.gz
+        cluster_name: kpmgstage3node_cluster
+        dc: kpmgstage3node
+        rack: stage3node
+        jdk: java-1.8.0-openjdk
+        seeds:
+          - 192.168.1.141
+          - 192.168.1.143
+          - 192.168.1.146
+      hosts:
+        kpmg-2a-prod-tod-1:
+          ansible_host: 192.168.1.141
+        kpmg-2a-prod-tod-2:
+          ansible_host: 192.168.1.142
+        kpmg-2a-prod-tod-3:
+          ansible_host: 192.168.1.143
+        kpmg-2a-prod-tod-4:
+          ansible_host: 192.168.1.144
+        kpmg-2a-prod-tod-5:
+          ansible_host: 192.168.1.145
+        kpmg-2a-prod-tod-6:
+          ansible_host: 192.168.1.146
+        kpmg-2a-prod-tod-7:
+          ansible_host: 192.168.1.147
+        kpmg-2a-prod-tod-8:
+          ansible_host: 192.168.1.148
+        kpmg-2a-prod-tod-9:
+          ansible_host: 192.168.1.149
+
+    vdm:
+      vars:
+        macre_properties_file: kpmg-prod-2a_macre.properties
+        process_name: macre
+        tomcat_url: https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.37/bin/apache-tomcat-9.0.37.zip
+        macre_base_path: /opt/apache-tomcat-9.0.37
+        backup_path: ~/backups
+        artifact_base: ~/ansible/artifacts
+        artifact_path: "{{ artifact_base }}/vdm.zip"
+        macre_heap_memory: 8
+      hosts:
+        kpmg-2a-prod-vdm:
+          ansible_host: 192.168.1.10
+
+    elastic-search:
+      vars:
+        memory_lock: "true"
+        es_artifact_file: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.3.0-linux-x86_64.tar.gz
+        process_name: elasticsearch
+        es_base_path: /opt/elasticsearch-7.3.0
+        cluster_name: taxilla
+        es_data_folder_path: /var/elastic-search/
+        user: taxadmin
+        master: false
+        heap_memory: 32
+      hosts:
+        kpmg-2a-prod-elastisearch-1:
+          ansible_host: 192.168.1.151
+          node_name: node-1
+          master: 'true'
+        kpmg-2a-prod-elastisearch-2:
+          node_name: node-2
+          ansible_host: 192.168.1.152
+        kpmg-2a-prod-elastisearch-3:
+          node_name: node-3
+          ansible_host: 192.168.1.153
+          master: 'true'
+        kpmg-2a-prod-elastisearch-4:
+          node_name: node-4
+          ansible_host: 192.168.1.154
+        kpmg-2a-prod-elastisearch-5:
+          node_name: node-5
+          ansible_host: 192.168.1.155
+        kpmg-2a-prod-elastisearch-6:
+          node_name: node-6
+          ansible_host: 192.168.1.156
+    zookeeper:
+      vars:
+        zoo_base_path: /opt/apache-zookeeper-3.6.1-bin
+        zoo_data_folder: /var/zookeeper/
+        user: taxadmin
+        heap_memory: 4
+        artifact_path: https://archive.apache.org/dist/zookeeper/zookeeper-3.6.1/apache-zookeeper-3.6.1-bin.tar.gz
+      hosts:
+        kpmg-2a-prod-zookeeper-1:
+          ansible_host: 192.168.1.157
+          node_id: 1
+        kpmg-2a-prod-zookeeper-2:
+          node_id: 2
+          ansible_host: 192.168.1.158
+        kpmg-2a-prod-zookeeper-3:
+          node_id: 3
+          ansible_host: 192.168.1.159
+    kafka:
+      vars:
+        process_name: kafka
+        user: taxadmin
+        base_path: /opt/kafka_2.12-2.5.0
+        kafka_base_path: /opt/kafka_2.12-2.5.0/
+        kafka_data_folder: /var/kafka
+        heap_memory: 6
+        artifact_path: https://archive.apache.org/dist/kafka/2.5.0/kafka_2.12-2.5.0.tgz
+        offsets_topic_replication_factor: 3
+      hosts:
+        kpmg-2a-prod-kafka-1:
+          ansible_host: 192.168.1.160
+          broker_id: 1
+        kpmg-2a-prod-kafka-2:
+          ansible_host: 192.168.1.161
+          broker_id: 2
+        kpmg-2a-prod-kafka-3:
+          ansible_host: 192.168.1.162
+          broker_id: 3

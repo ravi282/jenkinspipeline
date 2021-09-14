@@ -1,0 +1,28 @@
+---
+- name: zabix proxy repo
+  yum:
+    name: https://repo.zabbix.com/zabbix/4.4/rhel/7/x86_64/zabbix-release-4.4-1.el7.noarch.rpm
+    state: present
+
+- name: zabbix proxy
+  yum:
+    name: zabbix-proxy
+    state: present
+
+
+- name: Restore database
+  mysql_db:
+    name: zabbix_proxy
+    state: import
+    target: /usr/share/doc/zabbix-proxy-mysql-4.4.7/schema.sql.gz
+
+- name: copy the configuration file
+  template:
+    src: zabbix_proxy.conf.j2
+    dest: /etc/zabbix/zabbix_proxy.conf
+
+- name: start zabbix-proxy
+  systemd:
+    state: started
+    name: zabbix-proxy
+    enabled: yes

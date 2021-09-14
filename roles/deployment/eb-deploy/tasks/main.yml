@@ -1,0 +1,18 @@
+---
+# tasks file for eb-deploy
+- include: eb-stop.yml
+  tags:
+    - eb-stop
+    - eb-restart
+    - eb-deploy
+    - never
+- include: eb-deployment.yml
+  tags:
+    - eb-deploy
+    - never
+- include: eb-start.yml
+  tags:
+    - eb-start
+    - eb-restart
+    - eb-deploy
+    - never

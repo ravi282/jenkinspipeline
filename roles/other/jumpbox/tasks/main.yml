@@ -1,0 +1,5 @@
+---
+# tasks file for jumpbox
+- include: jumpbox.yml
+  tags:
+    - jumpbox

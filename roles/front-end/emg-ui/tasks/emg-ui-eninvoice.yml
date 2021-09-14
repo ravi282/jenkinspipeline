@@ -1,0 +1,25 @@
+---
+# eninvoice deployment
+- name: ensure eninvoice directory is on nginx
+  file:
+    path: "{{ ei_base_path }}/app"
+    state: directory
+
+- name: ensure eninvoice directory is on nginx
+  file:
+    path: "{{ ei_backup_path }}"
+    state: directory
+
+- name: taking the backup of app folder
+  shell: "mv {{ ei_base_path }}/app {{ ei_backup_path }}/app_$(date +%d-%m-%Y_%H-%M-%S)"
+  ignore_errors: yes
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ ei_artifact_path }}"
+    dest: "{{ ei_base_path }}"
+
+- name: rename eninvoice folder to app
+  command: "mv {{ ei_base_path }}/eninvoice-ui  {{ ei_base_path }}/app"
+
+

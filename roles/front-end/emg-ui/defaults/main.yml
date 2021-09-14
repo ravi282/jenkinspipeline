@@ -1,0 +1,21 @@
+---
+# defaults file for emg-ui
+
+# defaults file for emg-encomply-ui
+ec_backup_path: ~/backups/emg-ui/emg-encomply
+ec_base_path: /usr/share/nginx/EMG-UI/emg-encomply
+ec_artifact_base: ~/ansible/artifacts
+ec_artifact_path: "{{ ei_artifact_base }}/emg-encomply-ui.zip"
+
+# defaults file for emg-eninvoice-ui
+ei_backup_path: ~/backups/emg-ui/emg-enreport
+ei_base_path: /usr/share/nginx/EMG-UI/emg-eninvoice
+ei_artifact_base: ~/ansible/artifacts
+ei_artifact_path: "{{ ei_artifact_base }}/emg-eninvoice-ui.zip"
+
+# defaults file for emg-enreport-ui
+emg: EMG-UI
+er_backup_path: ~/backups/emg-ui/emg-enreport
+er_base_path: "/usr/share/nginx/{{ emg }}/emg-enreport"
+er_artifact_base: ~/ansible/artifacts
+er_artifact_path: "{{ ei_artifact_base }}/emg-enreport-ui.zip"

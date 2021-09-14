@@ -1,0 +1,186 @@
+---
+all:
+  vars:
+    ansible_user: centos
+    project_name: assetqa
+    ansible_ssh_private_key_file: ~/.ssh/encomply-dev.pem
+    eisrc: "/usr/share/nginx/eninvoice/app"
+    zabbix_server: 10.0.1.6
+    tax_port: 8080
+    etl_port: 8080
+    es_port: 9200
+    search_port: 8383
+    macre_port: 8080
+    user_port: 9191
+    eb_port: 7656
+    es_health_url: /_cat/health
+    macre_health_url: /vdm/api/properties
+    tax_health_url: /mapro/application-properties
+    etl_health_url: /etl/rest/etl
+    search_health_url: /search/healthcheck
+    user_health_url: /users
+    zabbix_metadata: assetqa
+    nexus_common_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev
+  children:
+    mapro:
+      vars:
+        process_name: taxilla
+        base_path: /opt/taxilla
+        backup_path: ~/backups
+        health_url: http://localhost:{{ tax_port }}/mapro/application-properties
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        heap_memory: 8
+        file_beat_path: /opt/taxilla/logs/taxilla.log
+        tmp_dir: /var/taxilla
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev/assetqa-dev-mapro.zip
+      children:
+        mapro_encomply:
+          vars:
+            category: '-'
+          hosts:
+            assetqa-marpo-user-eb-01:
+              ansible_host: 10.0.1.9
+        mapro_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            assetqa-mapro-eninvoice-01:
+              ansible_host: 10.0.1.5
+
+    user:
+      vars:
+        process_name: user
+        user_base_path: /opt/user
+        backup_path: ~/backups
+        health_url: http://localhost:{{ user_port }}/idm/misc/properties
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        heap_memory: 8
+        file_beat_path: /opt/user/logs/application.log
+        tmp_dir: /var/taxilla
+        user_artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev/assetqa-dev-user.zip
+      hosts:
+        assetqa-mapro-user-eb-01:
+          ansible_host: 10.0.1.9
+
+
+    etl:
+      vars:
+        process_name: etl
+        tomcat_url: https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.37/bin/apache-tomcat-9.0.37.zip
+        base_path: /opt/etltomcat9037
+        file_beat_path: /opt/etltomcat9037/logs/etl.log
+        heap_memory: 24
+        CATALINA_TMPDIR: "/var/etl"
+        health_url: http://localhost:{{ etl_port }}/etl/rest/etl
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        artifact_path:  http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev/assetqa-dev-etl.zip
+      children:
+        etl_encomply:
+          vars:
+            category: '-'
+          hosts:
+            assetqa-etl-zookeeper-01:
+              ansible_host: 10.0.2.243
+        etl_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            assetqa-etl-eninvoice-01:
+              ansible_host: 10.0.1.5
+
+    search:
+      vars:
+        process_name: search
+        search_subdirectory: /search
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        base_path: /opt/search-server
+        file_beat_path: "{{ base_path }}/logs/search.log"
+        health_url: http://localhost:{{ search_port }}/search/healthcheck
+        heap_memory: 8
+        artifact_path:  http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev/assetqa-dev-search.zip
+      children:
+        search_encomply:
+          vars:
+            category: '-'
+          hosts:
+            assetqa-search-tod-01:
+              ansible_host: 10.0.2.12
+        search_eninvoice:
+          vars:
+            category: ewb
+          hosts:
+            assetqa-search-eninvoice-01:
+              ansible_host: 10.0.1.5
+
+
+    vdm:
+      vars:
+        process_name: vdm
+        health_url: http://localhost:{{ macre_port }}/vdm/api/properties
+        base_path: /opt/vdmtomcat9037/webapps
+        artifact_path:  http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev/assetqa-dev-vdm.zip
+      hosts:
+        asset-qa-vdm-kafka-01:
+          ansible_host: 10.0.1.6
+    es:
+      hosts:
+        asset-qa-elastic-search-1:
+          ansible_host: 10.0.1.10
+
+    tods:
+      hosts:
+        assetqa-search-tod-01:
+          ansible_host: 10.0.2.12
+
+
+    nginx:
+      vars:
+        base_path: /usr/share/nginx
+        artifact_path:  http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev/assetqa-dev-taxillaui.zip
+      hosts:
+        asset-qa-nginx-1:
+          ansible_host: 10.0.2.13
+
+    macreui:
+      vars:
+        macreui_base_path: /usr/share/nginx
+        macreui_artifact_path:  http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev/assetqa-dev-macreui.zip
+      hosts:
+        asset-qa-macreui:
+          ansible_host: 10.0.1.6
+
+    zookeeper:
+      hosts:
+        assetqa-etl-zookeeper-01:
+          ansible_host: 10.0.2.243
+
+    property:
+      vars:
+        base_path: /opt/property-loader
+        artifact_path:  http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev/assetqa-dev-property.zip
+      hosts:
+        assetqa-etl-zookeeper-01:
+          ansible_host: 10.0.1.10
+
+    kafka:
+      hosts:
+        asset-qa-vdm-kafka-01:
+          ansible_host: 10.0.1.6
+
+    eb:
+      vars:
+        eb_process_name: eninvoice
+        health_url: http://localhost:{{eb_prot}}/
+        base_path: /opt/envoice-server
+        artifact_path:  http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev/assetqa-dev-eninvoice.zip
+      hosts:
+        assetqa-mapro-user-eb-01:
+          ansible_host: 10.0.1.9
+    utils:
+      vars:
+        process_name: application
+        base_path: /opt/utilities_gmap
+        artifact_path:  http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/assetqa/dev/assetqa-dev-gmap.zip
+      hosts:
+        assetqa-tod-utils-01:
+          ansible_host: 10.0.2.12

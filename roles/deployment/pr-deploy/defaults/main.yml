@@ -1,0 +1,8 @@
+---
+# defaults file for eb-deploy
+eb_base_path: /opt/envoice-server
+backup_path: ~/backup
+artifact_path: ~/ansible/artifacts/eninvoice-backend.zip
+process_name: envoice
+user: taxadmin
+group: taxadmin

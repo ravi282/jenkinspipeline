@@ -1,0 +1,5 @@
+---
+- name: start utilities server
+  shell:
+    chdir: "{{ base_path}}/application/bin"
+    cmd: /usr/bin/nohup /bin/sh application &

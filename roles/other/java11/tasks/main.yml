@@ -1,0 +1,17 @@
+---
+# tasks file for java11
+- block:
+  - name: install epel release
+    yum:
+      name: epel-release
+      state: latest
+
+- name: install jdk 11
+  yum:
+    name:
+      - java-11-openjdk-devel
+    state: present
+
+- name: Correct java version selected
+  shell: sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.7.10-4.el7_8.x86_64/bin/java
+  become: yes

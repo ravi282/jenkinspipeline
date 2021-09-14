@@ -1,0 +1,6 @@
+---
+#etl start
+- name: strat etl server
+  shell:
+    chdir: "{{ etl_base_path }}/bin/"
+    cmd: /usr/bin/nohup /bin/sh catalina.sh start

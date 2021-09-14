@@ -1,0 +1,88 @@
+---
+# etl setup
+- name: verifying for all the varibles declaration.
+  fail: msg="Variable '{{ item }}' is not defined"
+  when: item not in hostvars[inventory_hostname]
+  with_items:
+    - jgroup_cluster_name
+    - category
+- name: install wkhtmltox pckage
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - urw-fonts
+    - libXext
+    - libXrender
+    - fontconfig
+    - libfontconfig.so.1
+
+- name: create symlink for wkhtmltopdf
+  file:
+    src: /usr/local/bin/wkhtmltopdf
+    dest: /usr/bin/wkhtmltopdf
+    state: link
+
+- name: create symlink for wkhtmltoimage
+  file:
+    src: /usr/local/bin/wkhtmltoimage
+    dest: /usr/bin/wkhtmltoimage
+    state: link
+
+- name: download the tomcat
+  unarchive:
+    src: "{{ tomcat_url }}"
+    dest: /opt
+    remote_src: yes
+
+- name: create {{ CATALINA_TMPDIR }} temp directory.
+  file:
+    path: "{{ CATALINA_TMPDIR }}"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+  tags:
+    - create-tmp
+
+- name: create etl temp directory.
+  shell: "sudo mv /opt/apache-tomcat-9.0.37 {{ base_path }}"
+
+- name: creating setenv files in bin.
+  template:
+    src: "setenv.sh.j2"
+    dest: "{{ base_path }}/bin/setenv.sh"
+  tags:
+    - update-startup
+
+
+- name: creating jgroups file in properties.
+  template:
+    src: "jgroups_s3_config.xml.j2"
+    dest: "{{ base_path }}/conf/jgroups_s3_config.xml"
+
+
+- name: Remove webapps directory
+  file:
+    path: "{{ base_path }}/webapps"
+    state: absent
+
+- name: Create webapps directory if it does not exist
+  file:
+    path: "{{ base_path }}/webapps"
+    state: directory
+    mode: 0755
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ artifact_path }}"
+    dest: "{{ base_path }}/webapps"
+
+- name: change the permissions for {{ base_path }}.
+  file:
+    path: "{{ base_path }}"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+    mode: '0755'
+    recurse: true
+  tags:
+    - update-startup

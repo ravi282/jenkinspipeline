@@ -1,0 +1,23 @@
+---
+# tasks file for macre-deploy
+- include: macre-stop.yml
+  tags:
+    - never
+    - macre-deploy
+    - macre-stop
+    - macre-restart
+- include: macre-deployment.yml
+  tags:
+    - never
+    - macre-deploy
+- include: macre-start.yml
+  tags:
+    - never
+    - macre-restart
+    - macre-deploy
+    - macre-start
+- include: macre-health.yml
+  tags:
+    - never
+    - macre-health
+    - health

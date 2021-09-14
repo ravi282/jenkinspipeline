@@ -1,0 +1,50 @@
+---
+# user setup tasks.
+- name: verifying for all the varibles declaration.
+  fail: msg="Variable '{{ item }}' is not defined"
+  when: item not in hostvars[inventory_hostname]
+  with_items:
+    - heap_memory
+    - mysql_hostname
+    - mysql_user
+    - mysql_password
+    - heap_memory
+    - qr_code_url
+    - user_port
+
+- name: ensure config directory is on user server
+  file:
+    path: "{{ user_base_path }}/config"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ group }}"
+
+- name: create properties file.
+  template:
+    src: "application.properties.j2"
+    dest: "{{ user_base_path }}/config/application.properties"
+  tags:
+    - update-properties
+
+- name: create startup script file.
+  template:
+    src: "startup.sh.j2"
+    dest: "{{ user_base_path }}/startup.sh"
+  tags:
+    - update-startup
+
+- name: unzip user artifact
+  unarchive:
+    src: "{{ user_artifact_path }}"
+    dest: "{{ user_base_path }}"
+
+- name: change the permissions for {{ user_base_path }}.
+  file:
+    path: "{{ user_base_path }}"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+    mode: '0755'
+    recurse: true
+  tags:
+    - update-startup
+    - update-properties

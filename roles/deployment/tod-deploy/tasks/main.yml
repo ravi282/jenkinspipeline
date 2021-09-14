@@ -1,0 +1,45 @@
+---
+# tasks file for tod-deploy
+- name: nodetool flush
+  shell:
+    chdir: "{{ tod_base_path }}/bin"
+    cmd: sh nodetool flush
+  tags:
+    - tod-stop
+    - tod-restart
+    - never
+    - nodetool-flush
+- include: tod-stop.yml
+  tags:
+    - tod-stop
+    - tod-restart
+    - never
+- block:
+  - name: update the cassandra.yml configuration file
+    template:
+      dest: "{{ tod_base_path}}/conf/cassandra.yaml"
+      src: cassandra.yaml.j2
+
+  - name: update rack dc properties
+    template:
+      dest: "{{ tod_base_path }}/conf/cassandra-rackdc.properties"
+      src: cassandra-rackdc.properties.j2
+  tags:
+    - tod-config
+    - never
+
+- name: strat cassandra server
+  become: yes
+  become_user: "{{ user }}"
+  shell:
+    chdir: "{{ tod_base_path }}/bin"
+    cmd: "/usr/bin/nohup /bin/sh cassandra &"
+  tags:
+    - tod-start
+    - tod-restart
+    - never
+- include: tod-health.yml
+  tags:
+   - tod-health
+   - health
+

@@ -1,0 +1,6 @@
+---
+#health check for macre
+- name: macre service health check
+  uri:
+    url: "http://localhost:{{macre_port}}{{macre_health_url}}"
+    

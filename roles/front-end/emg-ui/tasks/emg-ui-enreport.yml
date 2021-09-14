@@ -1,0 +1,22 @@
+---
+# enreport ui
+- name: ensure encomply directory is on nginx
+  file:
+    path: "{{ er_base_path }}/app"
+    state: directory
+
+- name: ensure backup directory is on nginx
+  file:
+    path: "{{ er_backup_path }}"
+    state: directory
+
+- name: taking the backup of app folder
+  shell: "mv {{ er_base_path }}/app {{ er_backup_path }}/app_$(date +%d-%m-%Y_%H-%M-%S)"
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ er_artifact_path }}"
+    dest: "{{ er_base_path }}"
+
+- name: rename enreport-ui folder.
+  command: "mv {{ er_base_path }}/enreport-ui {{ er_base_path }}/app"

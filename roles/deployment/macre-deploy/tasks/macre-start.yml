@@ -1,0 +1,6 @@
+---
+#macre start
+- name: strat macre server
+  shell:
+    chdir: "{{ base_path }}/bin/"
+    cmd: /usr/bin/nohup /bin/sh catalina.sh start

@@ -1,0 +1,23 @@
+---
+# tasks file for etl-deploy
+- include: etl-stop.yml
+  tags:
+    - never
+    - etl-deploy
+    - etl-stop
+    - etl-restart
+- include: etl-deployment.yml
+  tags:
+    - never
+    - etl-deploy
+- include: etl-start.yml
+  tags:
+    - never
+    - etl-restart
+    - etl-deploy
+    - etl-start
+- include: etl-health.yml
+  tags:
+    - never
+    - etl-health
+    - health

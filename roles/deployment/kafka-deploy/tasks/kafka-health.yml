@@ -1,0 +1,4 @@
+---
+#health check for kafka
+- name: kafka service health check
+  shell: "nc -vz 10.0.1.84 9092"

@@ -1,0 +1,5 @@
+---
+# tasks file for kafka
+- include: kafka-setup.yml
+
+

@@ -1,0 +1,5 @@
+---
+#health check for search
+- name: user service health check
+  uri:
+    url: "http://localhost:{{ ebport }}"

@@ -1,0 +1,4 @@
+---
+# tasks file for mapro
+- include: taxilla-setup.yml
+#- include: taxilla-deployment.yml

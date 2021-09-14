@@ -1,0 +1,127 @@
+---
+all:
+  vars:
+    ansible_user: centos
+    shared_services: sharedservices_kpmg-uat.js
+    ansible_ssh_private_key_file: ~/.ssh/pemfiles/KPMG-preprod-IND.pem
+    zabbix_server: 10.0.2.230
+    tax_port: 8282
+    etl_port: 8080
+    search_port: 8080
+    user_port: 9191
+    tax_health_url: /mapro/application-properties
+    etl_health_url: /etl/rest/etl
+    search_health_url: /search/healthcheck
+    user_health_url: /users
+    elk: 10.0.4.63
+    zabbix_metadata: kpmg-uat
+  children:
+    mapro:
+      vars:
+        file_beat_path: /opt/taxilla/logs/taxilla.log
+      children:
+        mapro_encomply:
+          hosts:
+            kpmg-uat-encomply-mapro-1:
+              ansible_host:  10.0.5.239
+            kpmg-uat-encomply-mapro-2:
+              ansible_host: 10.0.3.136
+            kpmg-uat-encomply-mapro-3:
+              ansible_host: 10.0.3.45
+        mapro_eninvoice:
+          hosts:
+            kpmg-uat-eninvoice-mapro-1:
+              ansible_host: 10.0.5.8
+    etl:
+      vars:
+        etl_base_path: /opt/etltomcat9037/
+        file_beat_path: /opt/etltomcat9037/logs/etl.log
+      children:
+        etl_encomply:
+          hosts:
+            kpmg-uat-encomply-etl-1:
+              ansible_host: 10.0.5.7
+            kpmg-uat-encomply-etl-2:
+              ansible_host: 10.0.3.123
+            kpmg-uat-encomply-etl-3:
+              ansible_host: 10.0.5.141
+        etl_eninvoice:
+          hosts:
+            kpmg-uat-encomply-etl-4:
+              ansible_host: 10.0.5.197
+    search:
+      vars:
+        file_beat_path: /opt/search-server/logs/search.log
+      children:
+        search_encomply:
+          hosts:
+            kpmg-uat-encomply-search-1:
+              ansible_host: 10.0.3.131
+            kpmg-uat-encomply-search-2:
+              ansible_host: 10.0.5.201
+            kpmg-uat-encomply-search-3:
+              ansible_host: 10.0.5.16
+        search_eninvoice:
+          hosts:
+            kpmg-uat-eninvoice-search-1:
+              ansible_host: 10.0.5.168
+
+    user:
+      hosts:
+        kpmg-uat-vdm:
+          ansible_host: localhost
+          ansible_connection: local
+    vdm:
+      hosts:
+        kpmg-uat-vdm:
+          ansible_host: 10.0.2.230
+          zabbix_server: 10.0.2.230
+          hostname: "kpmg-uat-zabbix-proxy"
+          dbuser: zabbix
+          dbname: zabbix_proxy
+          dbpasswd: zabbix
+    es:
+      hosts:
+        kpmg-uat-elastic-search-1:
+          ansible_host: 10.0.3.240
+        kpmg-uat-elastic-search-2:
+          ansible_host: 10.0.5.5
+        kpmg-uat-elastic-search-3:
+          ansible_host: 10.0.7.35
+    tods:
+      hosts:
+        kpmg-uat-tod-1:
+          ansible_host: 10.0.5.81
+        kpmg-uat-tod-2:
+          ansible_host: 10.0.5.82
+        kpmg-uat-tod-3:
+          ansible_host: 10.0.5.83
+    nginx:
+      hosts:
+        kpmg-uat-nginx-1:
+          ansible_host: 10.0.3.55
+        kpmg-uat-nginx-2:
+          ansible_host: 10.0.5.240
+        kpmg-uat-nginx-3:
+          ansible_host: 10.0.5.242
+    zookeeper:
+      vars:
+        zoo_base_path: /opt/zookeeper/apache-zookeeper-3.6.1-bin
+      hosts:
+        kpmg-uat-zookeeper-1:
+          ansible_host: 10.0.3.124
+        kpmg-uat-zookeeper-2:
+          ansible_host: 10.0.5.235
+        kpmg-uat-zookeeper-3:
+          ansible_host: 10.0.5.6
+    kafka:
+      vars:
+        heap_memory: 6
+      hosts:
+        kpmg-uat-kafka-1:
+          ansible_host: 10.0.3.145
+        kpmg-uat-kafka-2:
+          ansible_host: 10.0.5.247
+        kpmg-uat-kafka-3:
+          ansible_host: 10.0.5.193
+

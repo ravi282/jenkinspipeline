@@ -1,0 +1,42 @@
+server {
+    listen       80;
+    server_name  KPMG-PROD-Nginx-lb-1216201948.ap-south-1.elb.amazonaws.com;
+    server_name  stage-gstpilot.in.kpmg.com;
+    server_name  {{ ansible_host }}
+    server_tokens off;
+    gzip on;
+    gzip_types text/plain text/css text/javascript application/javascript application/json application/x-javascript text/xml application/xml application/xml+rss;
+    root /usr/share/nginx/encomply/app;
+
+    location = /healthcheck {
+        return 200;
+        add_header Content-Type text/plain;
+        add_header Content-Length 0;
+    }
+
+    location /email-notifications {
+        proxy_pass http://internal-KPMG-3node-stage-Taxilla-117021358.ap-south-1.elb.amazonaws.com/mapro/email-notifications;
+    }
+
+    location /token {
+        proxy_pass http://internal-KPMG-3node-stage-Taxilla-117021358.ap-south-1.elb.amazonaws.com/mapro/token;
+    }
+
+    location = / {
+        index index.html;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /eninvoice {
+        index eninvoice/index.html;
+        try_files $uri $uri/ /eninvoice/index.html;
+    }
+
+    location /enreport {
+        index enreport/index.html;
+        try_files $uri $uri/ /enreport/index.html;
+    }
+}

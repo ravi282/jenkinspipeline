@@ -1,0 +1,51 @@
+---
+- name: Install postgressql repository
+  yum:
+    name:
+      - https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+      - python-pip
+      - python-psycopg2
+    state: present
+
+- name: upgrade python pip package.
+  pip:
+    name: pip
+    state: latest
+
+- name: install psycopg2 packages.
+  pip:
+    name: psycopg2
+    state: present
+
+- name: Install postgressql
+  yum:
+    name:
+      - postgresql13-server
+    state: present
+
+- name: initialize the DB
+  shell: "/usr/pgsql-13/bin/postgresql-13-setup initdb"
+  args:
+    creates: /var/lib/pgsql/13/data/base
+
+- name: Ensure the PostgreSQL service is running
+  systemd:
+    state: started
+    name: postgresql-13
+    enabled: yes
+
+
+
+- name: Ensure database is created
+  postgresql_db:
+    name: "{{ db_name }}"
+  become_user: postgres
+
+- name: Ensure user has access to the database
+  postgresql_user:
+    db: "{{ db_name }}"
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: ALL
+    state: present
+  become_user: postgres

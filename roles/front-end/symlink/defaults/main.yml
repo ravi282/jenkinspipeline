@@ -1,0 +1,6 @@
+---
+# defaults file for symlink
+eisrc: "/usr/share/nginx/eninvoice/app"
+eidest: "/usr/share/nginx/encomply/app/eninvoice"
+ersrc: "/usr/share/nginx/enreport/app"
+erdest: "/usr/share/nginx/encomply/app/enreport"

@@ -1,0 +1,18 @@
+---
+- name: reaper repo installation
+  yum:
+    name: https://dl.bintray.com/thelastpickle/reaper-rpm/reaper-2.1.1-1.x86_64.rpm
+    state: present
+
+
+- name: update configuration file
+  template:
+    src: "cassandra-reaper.yaml.j2"
+    dest: /etc/cassandra-reaper/cassandra-reaper.yaml
+
+- name: Make cassandra reaper to run at startup.
+  systemd:
+    name: cassandra-reaper
+    state: started
+    enabled: yes
+

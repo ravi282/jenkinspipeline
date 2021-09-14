@@ -1,0 +1,20 @@
+export JAVA_OPTS="-Xms{{ heap_memory }}G -Xmx{{ heap_memory }}G"
+export JAVA_OPTS="$JAVA_OPTS -Dserver.port={{ search_port }}"
+export JAVA_OPTS="$JAVA_OPTS -Xlog:gc*:file=logs/gc.log:time,uptime,level,tags:filecount=32,filesize=64m"
+export JAVA_OPTS="$JAVA_OPTS -Dmapro.zookeeper.servers={% for h in groups['zookeeper'] -%}
+{% if  not loop.last -%}
+    {{ hostvars[h].ansible_host }}:2181,
+{%- endif %}
+{% if loop.last -%}
+    {{ hostvars[h].ansible_host }}:2181
+{%- endif %}
+{%- endfor %}"
+export JAVA_OPTS="$JAVA_OPTS -Djgroups-config-file={{ base_path }}/properties/jgroups_s3_config.xml"
+export JAVA_OPTS="$JAVA_OPTS -Dspring.profiles.active=kafka"
+export JAVA_OPTS="$JAVA_OPTS -Dsearch.support.backpressure=true"
+export JAVA_OPTS="$JAVA_OPTS -Dapp.name=encomply"
+export JAVA_OPTS="$JAVA_OPTS -Dproject.base.dir={{ base_path }}"
+export JAVA_OPTS="$JAVA_OPTS -Dmapro.kafka.allowed.categories={{ category }}"
+export JAVA_OPTS="$JAVA_OPTS -Djgroups-cluster-name={{ jgroup_cluster_name }}"
+export JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
+sh  /opt/search-server/search/bin/search &

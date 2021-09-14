@@ -1,0 +1,45 @@
+- hosts: tods
+  become: yes
+  roles:
+    - tod
+
+- hosts: elastic_search
+  become: yes
+  roles:
+    - elastic-search
+
+- hosts: zookeeper
+  become: yes
+  roles:
+    - zookeeper
+
+- hosts: kafka
+  become: yes
+  roles:
+    - kafka
+
+- hosts: user
+  become: yes
+  roles:
+    - user
+
+- hosts: mapro
+  become: yes
+  roles:
+    - mapro
+
+- hosts: etl
+  become: yes
+  roles:
+    - etl
+
+- hosts: search
+  become: yes
+  roles:
+    - search
+
+- hosts: jumpbox
+  become: yes
+  roles:
+    - jumpbox
+    - vncserver

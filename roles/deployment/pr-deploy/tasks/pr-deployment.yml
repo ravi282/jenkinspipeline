@@ -1,0 +1,25 @@
+---
+# user deployment
+- name: ensure property-loader directory is on zookpeer server
+  file:
+    path: "{{ base_path }}"
+    state: directory
+
+- name: ensure backup directory is on property loader server
+  file:
+    path: "{{ backup_path }}"
+    state: directory
+
+  #- name: taking the backup of eninvoice folder
+  #shell: "mv {{ eb_base_path}}/eninvoice {{ backup_path }}/eninvoice_$(date +%d-%m-%Y_%H-%M-%S)"
+
+- name: remove the property-loader.jar
+  file:
+    path: "{{base_path}}/property-loader.jar"
+    state: absent
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ artifact_path }}"
+    dest: "{{ base_path }}"
+    remote_src: yes

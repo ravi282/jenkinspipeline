@@ -1,0 +1,6 @@
+---
+# tasks file for macre-ui
+- include: macre-ui-deploy.yml
+  tags:
+    - macre-ui
+    - never

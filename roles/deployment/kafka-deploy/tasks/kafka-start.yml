@@ -1,0 +1,8 @@
+---
+#kafka start
+- name: strat kafka server
+  become: yes
+  become_user: "{{ user }}"
+  shell:
+    chdir: "{{ kafka_base_path }}/bin"
+    cmd: "/usr/bin/nohup /bin/sh kafka-server-start.sh ../config/server.properties &"

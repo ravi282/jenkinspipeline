@@ -1,0 +1,15 @@
+---
+plugin: aws_ec2
+regions:
+  - ap-south-1
+aws_access_key: AKIAJD77LECDCLZ5Z3WQ
+aws_secret_key: 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
+keyed_groups:
+  - key: tags.Ansible
+    prefix: tag
+groups:
+  # add hosts to the group development if any of the dictionary's keys or values is the word 'devel'
+  tod: "'Anisble' in (tags|list)"
+compose:
+  # set the ansible_host variable to connect with the private IP address without changing the hostname
+  ansible_host: private_ip_address

@@ -1,0 +1,330 @@
+def Java_Version = "OPENJDK-11.0.7"
+def PIPELINE_PROPS
+
+pipeline {
+    agent any
+
+    libraries {
+        lib('taxilla-jenkins-shared-library@develop')
+    }
+    tools {
+        jdk "$Java_Version"
+    }
+
+    parameters {
+        choice(name: 'ModuleType', choices: ['All', 'property-loader', 'user', 'etl', 'macre', 'mapro', 'search', 'eninvoice', 'gmap_utility', 'taxilla_ui', 'macre_ui'],
+                description: 'Pick something from the above Build for the currently required build')
+        string(name: 'Branch', defaultValue: 'develop', description: 'Give a currently required branch')
+        choice(name: 'Environment_Profile_Command', choices: ['qa-taxilla', 'platform-qa', 'product-qa', 'asset-qa', 'db-cloud'],
+                description: 'Pick something from the above profile command for the currently required build or environment')
+    }
+
+    stages {
+        stage("Property Loader Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'property-loader' }
+            }
+            steps {
+                script {
+                    try {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["PROPERTY_LOADER_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["PROPERTY_LOADER_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading from pipeline.property file
+                        compileSource("${PIPELINE_PROPS["PROPERTY_LOADER_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["PROPERTY_LOADER_BUILD_COMMAND"]}", "${PIPELINE_PROPS["PROPERTY_LOADER_CLASSIFIER"]}")
+                        //upload binaries to nexus qa repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["PROPERTY_LOADER_CLASSIFIER"]}",
+                                "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["PROPERTY_LOADER_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["PROPERTY_LOADER_BINARIES_PATH"]}")
+                        if (currentBuild.currentResult == 'SUCCESS') {
+                            ansiblePlaybookConfig("${env.JOB_BASE_NAME}", "${PIPELINE_PROPS["PROPERTY_TAG"]}", "${PIPELINE_PROPS["PROPERTY_LIMIT"]}")
+                        }
+                      }
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+
+        stage("User Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'user' }
+            }
+            steps {
+                script {
+                    try {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["USER_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["User_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading property file
+                        compileSource("${PIPELINE_PROPS["User_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MAPRO_SEARCH_USER_BUILD_COMMAND"]}", "${PIPELINE_PROPS["USER_CLASSIFIER"]}")
+                        //upload binaries to nexus qa repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["USER_CLASSIFIER"]}",
+                                "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["User_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["USER_BINARIES_PATH"]}")
+                        if (currentBuild.currentResult == 'SUCCESS') {
+                            ansiblePlaybookConfig("${env.JOB_BASE_NAME}", "${PIPELINE_PROPS["USER_TAG"]}", "${PIPELINE_PROPS["USER_LIMIT"]}")
+                        }
+                     }
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("Etl Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'etl' }
+            }
+            steps {
+                script {
+                    try {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["ETL_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["ETL_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading property file
+                        compileSource("${PIPELINE_PROPS["ETL_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ETL_MACRE_BUILD_COMMAND"]}", "${PIPELINE_PROPS["ETL_CLASSIFIER"]}")
+                        //upload binaries to nexus repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["ETL_CLASSIFIER"]}",
+                                "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["ETL_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ETL_BINARIES_PATH"]}")
+                        if (currentBuild.currentResult == 'SUCCESS') {
+                            ansiblePlaybookConfig("${env.JOB_BASE_NAME}", "${PIPELINE_PROPS["ETL_TAG"]}", "${PIPELINE_PROPS["ETL_LIMIT"]}")
+                        }
+                    }
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+
+        stage("Macre Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'macre' }
+            }
+            steps {
+                script {
+                    try {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["MACRE_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["Macre_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading property file
+                        compileSource("${PIPELINE_PROPS["Macre_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ETL_MACRE_BUILD_COMMAND"]}", "${PIPELINE_PROPS["MACRE_CLASSIFIER"]}")
+                        //upload binaries to nexus repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["MACRE_CLASSIFIER"]}",
+                                "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["Macre_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MACRE_BINARIES_PATH"]}")
+                        if (currentBuild.currentResult == 'SUCCESS') {
+                            ansiblePlaybookConfig("${env.JOB_BASE_NAME}", "${PIPELINE_PROPS["VDM_TAG"]}", "${PIPELINE_PROPS["VDM_LIMIT"]}")
+                        }
+                      }
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("Mapro Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'mapro' }
+            }
+            steps {
+                script {
+                    try {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["MAPRO_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["Mapro_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading property file
+                        compileSource("${PIPELINE_PROPS["Mapro_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MAPRO_SEARCH_USER_BUILD_COMMAND"]}", "${PIPELINE_PROPS["MAPRO_CLASSIFIER"]}")
+                        //upload binaries to nexus qa repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["MAPRO_CLASSIFIER"]}",
+                                "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["Mapro_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["Mapro_BINARIES_PATH"]}")
+                        if (currentBuild.currentResult == 'SUCCESS') {
+                            ansiblePlaybookConfig("${env.JOB_BASE_NAME}", "${PIPELINE_PROPS["MAPRO_TAG"]}", "${PIPELINE_PROPS["MAPRO_LIMIT"]}")
+                        }
+                      }
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("Search Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'search' }
+            }
+            steps {
+                script {
+                    try {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["SEARCH_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["Search_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading property file
+                        compileSource("${PIPELINE_PROPS["Search_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MAPRO_SEARCH_USER_BUILD_COMMAND"]}", "${PIPELINE_PROPS["SEARCH_CLASSIFIER"]}")
+                        //upload binaries to nexus qa repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["SEARCH_CLASSIFIER"]}",
+                                "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["Search_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["Search_BINARIES_PATH"]}")
+                        if (currentBuild.currentResult == 'SUCCESS') {
+                            ansiblePlaybookConfig("${env.JOB_BASE_NAME}", "${PIPELINE_PROPS["SEARCH_TAG"]}", "${PIPELINE_PROPS["SEARCH_LIMIT"]}")
+                        }
+                     }
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+
+        stage("Eninvoice Backend Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'eninvoice' }
+            }
+            steps {
+                script {
+                    try {
+                        catchError(stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["ENINVOICE_BACKEND_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["EnInvoice_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading from pipeline.property file
+                        compileSource("${PIPELINE_PROPS["EnInvoice_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ENINVOICE_ADDTAX_BACKEND_BUILD_COMMAND"]}", "${PIPELINE_PROPS["ENINVOICE_CLASSIFIER"]}")
+                        //upload binaries to nexus qa repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["ENINVOICE_CLASSIFIER"]}",
+                                "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["EnInvoice_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ENINVOICE_BINARIES_PATH"]}")
+                        if (currentBuild.currentResult == 'SUCCESS') {
+                            ansiblePlaybookConfig("${env.JOB_BASE_NAME}", "${PIPELINE_PROPS["EB_TAG"]}", "${PIPELINE_PROPS["EB_LIMIT"]}")
+                        }
+                     }
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("Google Utitlity Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'gmap_utility' }
+            }
+            steps {
+                script {
+                    try {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["GMAP_UTILITIES_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["GMAP_UTILS_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading from pipeline.property file
+                        compileSource("${PIPELINE_PROPS["GMAP_UTILS_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ETL_MACRE_BUILD_COMMAND"]}", "${PIPELINE_PROPS["GMAP_CLASSIFIER"]}")
+                        //upload binaries to nexus qa repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["GMAP_CLASSIFIER"]}",
+                                "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["GMAP_UTILS_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["GMAP_BINARIES_PATH"]}")
+                        if (currentBuild.currentResult == 'SUCCESS') {
+                            ansiblePlaybookConfig("${env.JOB_BASE_NAME}", "${PIPELINE_PROPS["UTILS_TAG"]}", "${PIPELINE_PROPS["UTILS_LIMIT"]}")
+                        }
+                    }
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+
+        stage("TaxillaUI Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'taxilla_ui' }
+            }
+            steps {
+                script {
+                    try {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["TAXILLA_UI_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["TAXILLAUI_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading from pipeline.property file
+                        compileSource("${PIPELINE_PROPS["TAXILLAUI_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["TAXILLA_UI_QA_BUILD_COMMAND"]}", "${PIPELINE_PROPS["TAXILLA_UI_CLASSIFIER"]}")
+                        //upload binaries to nexus qa repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["TAXILLA_UI_CLASSIFIER"]}",
+                                "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["TAXILLAUI_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["TAXILLA_UI_PATH"]}")
+                        if (currentBuild.currentResult == 'SUCCESS') {
+                            ansiblePlaybookConfig("${env.JOB_BASE_NAME}", "${PIPELINE_PROPS["TAXILLAUI_TAG"]}", "${PIPELINE_PROPS["TAXILLAUI_LIMIT"]}")
+                        }
+                     }
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("MacreUI Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'macre_ui' }
+            }
+            steps {
+                script {
+                    try {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["MACRE_UI_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["MACREUI_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading from pipeline.property file
+                        compileSource("${PIPELINE_PROPS["MACREUI_JOB_PROJECT_NAME"]}", "$params.Environment_Profile_Command", "${PIPELINE_PROPS["MACRE_UI_CLASSIFIER"]}")
+                        //upload binaries to nexus qa repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_QA_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["MACRE_UI_CLASSIFIER"]}",
+                                "${PIPELINE_PROPS["VERSION"]}", "${PIPELINE_PROPS["MACREUI_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MACRE_UI_PATH"]}")
+                        if (currentBuild.currentResult == 'SUCCESS') {
+                            ansiblePlaybookConfig("${env.JOB_BASE_NAME}", "${PIPELINE_PROPS["MACREUI_TAG"]}", "${PIPELINE_PROPS["MACREUI_LIMIT"]}")
+                        }
+                     }
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+
+    }
+    post {
+        success {
+            script {
+                if (params.ModuleType == 'All') {
+                    sendEmailNotification("${PIPELINE_PROPS["ETL_REPO_URL"]}", "${PIPELINE_PROPS["MACRE_REPO_URL"]}", "${PIPELINE_PROPS["MAPRO_REPO_URL"]}", "${PIPELINE_PROPS["SEARCH_REPO_URL"]}")
+                } else {
+                    sendSpecficModuleEmailNotification()
+
+                }
+            }
+
+        }
+        failure {
+            sendFailEmailNotification()
+        }
+        unstable {
+        echo 'This will run only if the run was marked as unstable'
+      }
+    }
+
+}
+

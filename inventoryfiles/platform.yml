@@ -1,0 +1,162 @@
+---
+all:
+  vars:
+    ansible_user: centos
+    ansible_ssh_private_key_file: ~/.ssh/pemfiles/Platfrom-QA.pem
+    eisrc: "/usr/share/nginx/eninvoice/app"
+    zabbix_server: 10.0.0.93
+    project_name: platformqa
+    tax_port: 8282
+    etl_port: 8080
+    es_port: 9200
+    macre_port: 8080
+    search_port: 8383
+    user_port: 8181
+    eb_port: 7656
+    tax_health_url: /mapro/application-properties
+    etl_health_url: /etl/rest/etl
+    user_health_url: /users
+    es_health_url: /_cat/health
+    search_health_url: /search/healthcheck
+    zabbix_metadata: platform
+  children:
+    mapro:
+      vars:
+        process_name: taxilla
+        base_path: /opt/taxilla
+        backup_path: ~/backups
+        health_url: http://localhost:{{ tax_port }}/mapro/application-properties
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        heap_memory: 8
+        file_beat_path: /opt/taxilla/logs/taxilla.log
+        tmp_dir: /var/taxilla
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/platformqa/dev/platformqa-dev-mapro.zip
+      hosts:
+        platform-qa-mapro-eb-01:
+          ansible_host: 10.0.1.253
+
+    etl:
+      vars:
+        process_name: etl
+        tomcat_url: https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.37/bin/apache-tomcat-9.0.37.zip
+        base_path: /opt/etltomcat9037
+        file_beat_path: /opt/etltomcat9037/logs/etl.log
+        heap_memory: 24
+        CATALINA_TMPDIR: "/var/etl"
+        health_url: http://localhost:{{ etl_port }}/etl/rest/etl
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/platformqa/dev/platformqa-dev-etl.zip
+      hosts:
+        platform-qa-kafka-etl-1:
+          ansible_host: 10.0.1.163
+
+    search:
+      vars:
+        process_name: search
+        search_subdirectory: /search
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        base_path: /opt/search-server
+        file_beat_path: "{{ base_path }}/logs/search.log"
+        health_url: http://localhost:{{ search_port }}/search/healthcheck
+        heap_memory: 8
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/platformqa/dev/platformqa-dev-search.zip
+      hosts:
+        platform-qa-search-tod-01:
+          ansible_host: 10.0.1.65
+
+    user:
+      vars:
+        process_name: user
+        user_base_path: /opt/user
+        backup_path: ~/backups
+        health_url: http://localhost:{{ user_port }}/idm/misc/properties
+        jgroup_cluster_name: jgroups-assetqa-cluster
+        heap_memory: 8
+        file_beat_path: /opt/user/logs/application.log
+        tmp_dir: /var/taxilla
+        user_artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/platformqa/dev/platformqa-dev-user.zip
+      hosts:
+        platform-qa-user-tod-01:
+          ansible_host: 10.0.1.65
+    vdm:
+      vars:
+        process_name: vdm
+        health_url: http://localhost:{{ macre_port }}/vdm/api/properties
+        base_path: /opt/vdmtomcat9037/
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/platformqa/dev/platformqa-dev-vdm.zip
+      hosts:
+        platform-qa-vdm:
+          ansible_host: 10.0.0.93
+    es:
+      hosts:
+        platform-qa-elastic-search-1:
+          ansible_host: 10.0.1.244
+
+    tods:
+      hosts:
+        platform-qa-tod-01:
+          ansible_host: 10.0.1.65
+
+    nginx:
+      vars:
+        base_path: /usr/share/nginx
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/platformqa/dev/platformqa-dev-taxillaui.zip
+      hosts:
+        platform-qa-nginx-1:
+          ansible_host: 10.0.0.174
+
+    macreui:
+      vars:
+        macreui_base_path: /usr/share/nginx
+        macreui_artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/platformqa/dev/platformqa-dev-macreui.zip
+      hosts:
+        platform-qa-macreui:
+          ansible_host: 10.0.0.93
+
+    zookeeper:
+      hosts:
+        platform-qa-zookeeper-1:
+          ansible_host: 10.0.1.237
+
+    property:
+      vars:
+        base_path: /opt/property-loader
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/platformqa/dev/platformqa-dev-property.zip
+      hosts:
+        platform-qa-zookeeper-1:
+          ansible_host: 10.0.1.237
+
+    kafka:
+      hosts:
+        platform-qa-kafka-etl-1:
+          ansible_host: 10.0.1.163
+
+    eb:
+      vars:
+        eb_process_name: eninvoice
+        eb_health_url: http://localhost:{{eb_prot}}/
+        eb_base_path: /opt/envoice-server
+        eb_artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/platformqa/dev/platformqa-dev-eninvoice.zip
+      hosts:
+        platform-qa-eb-01:
+          ansible_host: 10.0.1.253
+
+    utils:
+      vars:
+        process_name: application
+        base_path: /opt/utilities_gmap
+        artifact_path: http://35.175.83.118:8081/repository/taxilla-qa-releases/QA/platformqa/dev/platformqa-dev-gmap.zip
+      hosts:
+        platform-qa-utils:
+          ansible_host: 10.0.0.93
+
+    jumpbox:
+      vars:
+        ansible_user: ubuntu
+        users:
+          - ubuntu
+        password: Adq@1234
+        ansible_python_interpreter: /usr/bin/python3
+      hosts:
+        qa-taxilla-reaper-jumpbox:
+          ansible_host: 34.222.51.72

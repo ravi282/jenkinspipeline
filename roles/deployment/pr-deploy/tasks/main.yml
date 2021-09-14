@@ -1,0 +1,12 @@
+---
+# tasks file for pr-deploy
+- include: pr-deployment.yml
+  tags:
+    - pr-deploy
+    - never
+- include: pr-start.yml
+  tags:
+    - pr-start
+    - pr-restart
+    - pr-deploy
+    - never

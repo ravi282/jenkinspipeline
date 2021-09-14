@@ -1,0 +1,12 @@
+---
+# defaults file for macre-deploy
+process_name: macre
+user: taxadmin
+group: taxadmin
+env: develop
+
+macre_base_path: /opt/apache-tomcat-9.0.37
+backup_path: ~/backups
+
+artifact_base: ~/ansible/artifacts
+artifact_path: "{{ artifact_base }}/vdm.zip"

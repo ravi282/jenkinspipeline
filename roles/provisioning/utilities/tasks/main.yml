@@ -1,0 +1,20 @@
+---
+# tasks file for utilities
+- name: delete old folder
+  file:
+    path: "{{ base_path }}"
+    state: absent
+
+- name: extract the utlities artifact
+  unarchive:
+    dest: /opt
+    src: "{{ artifact_path }}"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+
+- name: start utilities server
+  shell:
+    chdir: "{{ base_path}}/bin"
+    cmd: /usr/bin/nohup /bin/sh application &
+  become: yes
+  become_user: "{{ user }}"

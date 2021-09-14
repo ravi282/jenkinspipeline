@@ -1,0 +1,24 @@
+---
+# user deployment
+- name: ensure user directory is on user server
+  file:
+    path: "{{ user_base_path }}/user"
+    state: directory
+
+- name: ensure user backup directory is on user server
+  file:
+    path: "{{ backup_path }}"
+    state: directory
+
+#- name: taking the backup of user folder
+#  shell: "mv {{ user_base_path}}/user {{ backup_path }}/user_$(date +%d-%m-%Y_%H-%M-%S)"
+- name: remove user directory is on user server
+  file:
+    path: "{{ user_base_path }}/user"
+    state: absent
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ user_artifact_path }}"
+    dest: "{{ user_base_path }}"
+    remote_src: yes

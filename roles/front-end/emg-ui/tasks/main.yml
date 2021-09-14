@@ -1,0 +1,11 @@
+---
+# tasks file for emg-ui
+- include: emg-ui-encomply.yml
+  tags:
+    - emgecui
+- include: emg-ui-eninvoice.yml
+  tags:
+    - emgeiui
+- include: emg-ui-enreport.yml
+  tags:
+    - emgerui

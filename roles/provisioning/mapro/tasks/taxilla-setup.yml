@@ -1,0 +1,55 @@
+---
+#taxilla deployments
+- name: verifying for all the varibles declaration.
+  fail: msg="Variable '{{ item }}' is not defined"
+  when: item not in hostvars[inventory_hostname]
+  with_items:
+    - jgroup_s3_bucket_name
+    - category
+    - search_port
+
+- name: create properties directory is on taxilla server
+  file:
+    path: "{{ base_path }}/properties"
+    state: directory
+    user: "{{ user }}"
+    group: "{{ group }}"
+
+- name: create {{ tmp_dir }} directory is on taxilla server
+  file:
+    path: "{{ tmp_dir }}"
+    state: directory
+    user: "{{ user }}"
+    group: "{{ group }}"
+    recurse: yes
+  tags:
+    - create-tmp
+
+- name: creating startup files in properties.
+  template:
+    src: "startup.sh.j2"
+    dest: "{{ base_path }}/startup.sh"
+  tags:
+    - update-startup
+
+
+- name: creating jgroups file in properties.
+  template:
+    src: "jgroups_s3_config.xml.j2"
+    dest: "{{ base_path }}/properties/jgroups_s3_config.xml"
+
+- name: unzip artifact
+  unarchive:
+    src: "{{ artifact_path }}"
+    dest: "{{ base_path }}"
+
+- name: change the permissions for {{ base_path }}.
+  file:
+    path: "{{ base_path }}"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+    mode: '0755'
+    recurse: true
+  tags:
+    - update-startup
+

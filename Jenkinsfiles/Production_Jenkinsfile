@@ -1,0 +1,278 @@
+def Java_Version = "OPENJDK-11.0.7"
+def PIPELINE_PROPS
+
+pipeline {
+    agent any
+
+    libraries {
+        lib('taxilla-jenkins-shared-library@master')
+    }
+    tools {
+        jdk "$Java_Version"
+    }
+
+    parameters {
+        choice(name: 'ModuleType', choices: ['All', 'etl', 'macre', 'mapro', 'search', 'user', 'eninvoice', 'gmap_utility', 'property-loader', 'taxilla_ui', 'macre_ui'],
+                description: 'Pick something from the above Build for the currently required build')
+        string(name: 'Branch', defaultValue: 'master', description: 'Give a currently required branch')
+        choice(name: 'Environment_Profile_Command', choices: ['vdm-taxilla-com','kpmg-live','kpmg-uat'],
+                description: 'Pick something from the above branch for the currently required build')
+        string(name: 'Release_Version', defaultValue: 'v3.4.8', description: 'Given the current release version')
+    }
+
+    stages {
+        stage("Etl Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'etl' }
+            }
+            steps {
+                script {
+                    try {
+                        //catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["ETL_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["ETL_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading property file
+                        compileSource("${PIPELINE_PROPS["ETL_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ETL_MACRE_BUILD_COMMAND"]}", "${PIPELINE_PROPS["ETL_CLASSIFIER"]}")
+                        //upload binaries to nexus prod repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_PROD_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["ETL_CLASSIFIER"]}",
+                                "$params.Release_Version", "${PIPELINE_PROPS["ETL_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ETL_BINARIES_PATH"]}")
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+
+        stage("Macre Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'macre' }
+            }
+            steps {
+                script {
+                    try {
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["MACRE_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["Macre_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading property file
+                        compileSource("${PIPELINE_PROPS["Macre_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ETL_MACRE_BUILD_COMMAND"]}", "${PIPELINE_PROPS["MACRE_CLASSIFIER"]}")
+                        //upload binaries to nexus prod repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_PROD_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["MACRE_CLASSIFIER"]}",
+                                "$params.Release_Version", "${PIPELINE_PROPS["Macre_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MACRE_BINARIES_PATH"]}")
+
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("Mapro Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'mapro' }
+            }
+            steps {
+                script {
+                    try {
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["MAPRO_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["Mapro_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading property file
+                        compileSource("${PIPELINE_PROPS["Mapro_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MAPRO_SEARCH_USER_BUILD_COMMAND"]}", "${PIPELINE_PROPS["MAPRO_CLASSIFIER"]}")
+                        //upload binaries to nexus prod repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_PROD_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["MAPRO_CLASSIFIER"]}",
+                                "$params.Release_Version", "${PIPELINE_PROPS["Mapro_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["Mapro_BINARIES_PATH"]}")
+
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("Search Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'search' }
+            }
+            steps {
+                script {
+                    try {
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["SEARCH_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["Search_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading property file
+                        compileSource("${PIPELINE_PROPS["Search_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MAPRO_SEARCH_USER_BUILD_COMMAND"]}", "${PIPELINE_PROPS["SEARCH_CLASSIFIER"]}")
+                        //upload binaries to nexus prod repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_PROD_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["SEARCH_CLASSIFIER"]}",
+                                "$params.Release_Version", "${PIPELINE_PROPS["Search_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["Search_BINARIES_PATH"]}")
+
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("User Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'user' }
+            }
+            steps {
+                script {
+                    try {
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["USER_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["User_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading property file
+                        compileSource("${PIPELINE_PROPS["User_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MAPRO_SEARCH_USER_BUILD_COMMAND"]}", "${PIPELINE_PROPS["USER_CLASSIFIER"]}")
+                        //upload binaries to nexus prod repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_PROD_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["USER_CLASSIFIER"]}",
+                                "$params.Release_Version", "${PIPELINE_PROPS["User_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["USER_BINARIES_PATH"]}")
+
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("Eninvoice Backend Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'eninvoice' }
+            }
+            steps {
+                script {
+                    try {
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["ENINVOICE_BACKEND_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["EnInvoice_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading from pipeline.property file
+                        compileSource("${PIPELINE_PROPS["EnInvoice_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ENINVOICE_ADDTAX_BACKEND_BUILD_COMMAND"]}", "${PIPELINE_PROPS["ENINVOICE_CLASSIFIER"]}")
+                        //upload binaries to nexus prod repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_PROD_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["ENINVOICE_CLASSIFIER"]}",
+                                "$params.Release_Version", "${PIPELINE_PROPS["EnInvoice_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ENINVOICE_BINARIES_PATH"]}")
+
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("Google Utitlity Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'gmap_utility' }
+            }
+            steps {
+                script {
+                    try {
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["GMAP_UTILITIES_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["GMAP_UTILS_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading from pipeline.property file
+                        compileSource("${PIPELINE_PROPS["GMAP_UTILS_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["ETL_MACRE_BUILD_COMMAND"]}", "${PIPELINE_PROPS["GMAP_CLASSIFIER"]}")
+                        //upload binaries to nexus prod repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_PROD_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["GMAP_CLASSIFIER"]}",
+                                "$params.Release_Version", "${PIPELINE_PROPS["GMAP_UTILS_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["GMAP_BINARIES_PATH"]}")
+
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("Property Loader Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'property-loader' }
+            }
+            steps {
+                script {
+                    try {
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["PROPERTY_LOADER_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["PROPERTY_LOADER_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading from pipeline.property file
+                        compileSource("${PIPELINE_PROPS["PROPERTY_LOADER_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["PROPERTY_LOADER_BUILD_COMMAND"]}", "${PIPELINE_PROPS["PROPERTY_LOADER_CLASSIFIER"]}")
+                        //upload binaries to nexus prod repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_PROD_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["PROPERTY_LOADER_CLASSIFIER"]}",
+                                "$params.Release_Version", "${PIPELINE_PROPS["PROPERTY_LOADER_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["PROPERTY_LOADER_BINARIES_PATH"]}")
+
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("TaxillaUI Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'taxilla_ui' }
+            }
+            steps {
+                script {
+                    try {
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["TAXILLA_UI_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["TAXILLAUI_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading from pipeline.property file
+                        compileSource("${PIPELINE_PROPS["TAXILLAUI_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["TAXILLA_UI_QA_BUILD_COMMAND"]}", "${PIPELINE_PROPS["TAXILLA_UI_CLASSIFIER"]}")
+                        //upload binaries to nexus prod repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_PROD_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["TAXILLA_UI_CLASSIFIER"]}",
+                                "$params.Release_Version", "${PIPELINE_PROPS["TAXILLAUI_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["TAXILLA_UI_PATH"]}")
+
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+        stage("MacreUI Build") {
+            when {
+                expression { params.ModuleType == 'All' || params.ModuleType == 'macre_ui' }
+            }
+            steps {
+                script {
+                    try {
+                        PIPELINE_PROPS = readProperties file: 'pipelineproperties/pipeline.properties'
+                        // checkout code from git remote repositories
+                        gitCheckOut("${PIPELINE_PROPS["MACRE_UI_REPO_URL"]}", "$params.Branch", "${PIPELINE_PROPS["MACREUI_JOB_PROJECT_NAME"]}")
+                        //Clean old jars from .gradle cache directory
+                        cleanOldJars()
+                        //Compile build as per module defined in reading from pipeline.property file
+                        compileSource("${PIPELINE_PROPS["MACREUI_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MACRE_UI_BUILD_COMMAND"]}", "${PIPELINE_PROPS["MACRE_UI_CLASSIFIER"]}")
+                        //upload binaries to nexus prod repository
+                        uploadingToNexusRepo("${PIPELINE_PROPS["NEXUS_PROD_UPLOAD_TYPE"]}", "${PIPELINE_PROPS["MACRE_UI_CLASSIFIER"]}","$params.Release_Version", "${PIPELINE_PROPS["MACREUI_JOB_PROJECT_NAME"]}", "${PIPELINE_PROPS["MACRE_UI_PATH"]}")
+
+                    } catch (Exception e) {
+                        sendFailEmailNotification()
+                    }
+                }
+            }
+        }
+
+    }
+    post {
+        always {
+            script {
+                if (params.ModuleType == 'All') {
+                    sendEmailNotification("${PIPELINE_PROPS["ETL_REPO_URL"]}", "${PIPELINE_PROPS["MACRE_REPO_URL"]}", "${PIPELINE_PROPS["MAPRO_REPO_URL"]}", "${PIPELINE_PROPS["SEARCH_REPO_URL"]}")
+                } else {
+                    sendSpecficModuleEmailNotification()
+                }
+            }
+
+        }
+    }
+}

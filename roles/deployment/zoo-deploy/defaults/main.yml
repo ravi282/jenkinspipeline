@@ -1,0 +1,6 @@
+---
+# defaults file for zoo-deploy
+zoo_base_path: /opt/apache-zookeeper-3.6.1-bin/
+user: taxadmin
+process_name: zookeeper
+zoo_data_folder: /var/zookeeper

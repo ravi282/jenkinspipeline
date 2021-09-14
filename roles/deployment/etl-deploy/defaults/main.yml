@@ -1,0 +1,12 @@
+---
+# defaults file for etl-deploy
+process_name: etl
+user: taxadmin
+group: taxadmin
+env: develop
+
+etl_base_path: /opt/etltomcat9037/
+backup_path: ~/backups
+
+artifact_base: ~/ansible/artifacts
+artifact_path: "{{ artifact_base }}/etl.zip"

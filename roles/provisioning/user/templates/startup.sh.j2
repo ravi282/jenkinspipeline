@@ -1,0 +1,6 @@
+export JAVA_OPTS="-Xms{{ heap_memory }}G -Xmx{{ heap_memory }}G"
+export JAVA_OPTS="$JAVA_OPTS -Xlog:gc=trace:file=logs/gc.log:time,uptime,level,tags:filecount=32,filesize=64m"
+export SPRING_CONFIG_NAME=application
+export SPRING_CONFIG_LOCATION=file:///opt/user/config/
+sh /opt/user/user/bin/user &
+

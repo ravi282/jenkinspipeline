@@ -1,0 +1,2 @@
+export CATALINA_OPTS="-Xms{{ macre_heap_memory }}G -Xmx{{ macre_heap_memory }}G"
+export JAVA_OPTS="$JAVA_OPTS -Dmacre.app.props={{ macre_base_path }}/conf/macre.properties"

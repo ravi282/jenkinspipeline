@@ -1,0 +1,5 @@
+---
+#health check for elasticsearch
+- name: elastic service health check
+  uri:
+   url: "http://localhost:{{ es_port }}{{ es_health_url }}"

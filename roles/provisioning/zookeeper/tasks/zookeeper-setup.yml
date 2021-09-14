@@ -1,0 +1,50 @@
+---
+#Zookeeper setup
+- name: checking for the alll varibles declartion.
+  fail: msg="Variable '{{ item }}' is not defined"
+  when: item not in hostvars[inventory_hostname]
+  with_items:
+    - node_id
+- name: unarchive the tar file
+  unarchive:
+    src: "{{ artifact_path }}"
+    dest: /opt
+    remote_src: yes
+
+- name: Updating the properties in zoo.cfg
+  template:
+    src: zoo.cfg.j2
+    dest: "{{ zoo_base_path }}/conf/zoo.cfg"
+  tags:
+    - zoo-config
+
+- name: exporting jvm options
+  template:
+    src: java.env.j2
+    dest: "{{ zoo_base_path }}/conf/java.env"
+
+- name: create zookeeper data directory
+  file:
+    path: "{{ zoo_data_folder }}"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    recurse: yes
+
+- name: copy my id file.
+  template:
+    src: myid.j2
+    dest: "{{ zoo_data_folder }}/myid"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+  tags:
+    - zoo-config
+
+- name: Change the ownership to {{ user }}
+  file:
+    path: "{{ zoo_base_path }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    recurse: yes
+  tags:
+    - zoo-config

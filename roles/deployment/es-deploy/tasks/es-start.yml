@@ -1,0 +1,8 @@
+---
+#elasticsearch start
+- name: strat elasticsearch server
+  become: yes
+  become_user: "{{ user }}"
+  shell:
+    chdir: "{{ es_base_path }}/bin"
+    cmd: "/usr/bin/nohup /bin/sh elasticsearch &"

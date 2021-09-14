@@ -1,0 +1,24 @@
+---
+#taxilla deployments
+- block:
+  - name: ensure taxilla directory is on taxilla server
+    file:
+      path: "{{ base_path }}/taxilla"
+      state: directory
+
+  - name: ensure taxilla backup directory is on taxilla server
+    file:
+      path: "{{ backup_path }}"
+      state: directory
+
+  - name: taking the backup of taxilla folder
+    shell: "mv {{ base_path }}/taxilla {{ backup_path }}/taxilla_$(date +%d-%m-%Y_%H-%M-%S)"
+    become: yes
+    become_user: root
+
+  - name: unzip artifact
+    unarchive:
+      src: "{{ artifact_path }}"
+      dest: "{{ base_path }}"
+  become: yes
+  become_user: "{{ user }}"

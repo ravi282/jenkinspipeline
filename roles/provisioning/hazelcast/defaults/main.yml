@@ -1,0 +1,7 @@
+---
+# defaults file for hazelcast
+user: taxadmin
+group: taxadmin
+heap_memory: 8
+#hazelcast_name: develop
+hz_base_path: /opt/hazelcast

@@ -1,0 +1,38 @@
+---
+all:
+  vars:
+    ansible_user: centos
+    ansible_ssh_private_key_file: ~/.ssh/Platfrom-QA.pem
+    eisrc: "/usr/share/nginx/eninvoice/app"
+    zabbix_server: 10.0.0.93
+    tax_port: 8282
+    etl_port: 8080
+    search_port: 8080
+    user_port: 8181
+    tax_health_url: /mapro/application-properties
+    etl_health_url: /etl/rest/etl
+    search_health_url: /search/healthcheck
+    user_health_url: /users
+  children:
+    tods:
+      vars:
+        cluster_name: encomply_prod_cluster
+        dc: encomplyprod_dc
+        rack: encomplyprod_rack
+        seeds:
+          - 10.0.1.87
+          - 10.0.1.21
+          - 10.0.1.242
+      hosts:
+        encomply-tod-1:
+          ansible_host: 10.0.1.87
+        encomply-tod-2:
+          ansible_host: 10.0.1.85
+        encomply-tod-3:
+          ansible_host: 10.0.1.21
+        encomply-tod-4:
+          ansible_host: 10.0.1.224
+        encomply-tod-5:
+          ansible_host: 10.0.1.242
+        encomply-tod-6:
+          ansible_host: 10.0.1.117
